@@ -1,0 +1,25 @@
+version: "3.7"
+
+x-general_config: &general_config
+  image: golang:1.20
+  working_dir: /workspace
+  volumes:
+    - .:/workspace
+    - /etc/passwd:/etc/passwd:ro
+    - /etc/group:/etc/group:ro
+    - ./.go_build/cache:/tmp/.cache
+    - ./.go_build/pkg:/go/pkg
+  environment:
+    - HOME=/tmp
+
+
+services:
+  build:
+    <<: *general_config
+    entrypoint: go build -o ./bin -ldflags "-s -w"
+  run:
+    <<: *general_config
+    entrypoint: go run
+  go:
+    <<: *general_config
+    entrypoint: go
