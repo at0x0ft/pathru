@@ -19,3 +19,7 @@ clean:
 cache_clear:
 	sudo rm -rf ./.go_build/* && \
 	git checkout HEAD -- ./.go_build
+
+.PHONY: test
+test:
+	docker compose run --rm -u "$$(id -u):$$(id -g)" go test -v ./...
