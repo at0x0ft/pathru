@@ -11,7 +11,7 @@ import (
     "os/exec"
     "path/filepath"
     "github.com/spf13/cobra"
-    "github.com/at0x0ft/pathru/internal/pkg/schema"
+    // "github.com/at0x0ft/pathru/internal/pkg/schema"
 )
 
 const (
@@ -98,36 +98,36 @@ func tryResolvingPath(arg string) (bool, string) {
 }
 
 func getDockerComposeFileAbsPathList() ([]string, error) {
-    devcontainerDirPath := filepath.Join(os.Getenv(SrcMountPointEnv), DevContainerDirname)
-    devcontainer, err := schema.LoadDevcontainer(devcontainerDirPath)
-    if err != nil {
+    // devcontainerDirPath := filepath.Join(os.Getenv(SrcMountPointEnv), DevContainerDirname)
+    // devcontainer, err := schema.LoadDevcontainer(devcontainerDirPath)
+    // if err != nil {
         return nil, err
-    }
+    // }
 
-    var absPathList []string
-    for _, dockerComposeFileRelpath := range devcontainer.DockerComposeFile {
-        absPathList = append(absPathList, filepath.Join(devcontainerDirPath, dockerComposeFileRelpath))
-    }
-    return absPathList, nil
+    // var absPathList []string
+    // for _, dockerComposeFileRelpath := range devcontainer.DockerComposeFile {
+    //     absPathList = append(absPathList, filepath.Join(devcontainerDirPath, dockerComposeFileRelpath))
+    // }
+    // return absPathList, nil
 }
 
 func serviceExists(serviceName string, dockerComposeFileList []string) error {
-    dockerCompose, err := schema.LoadMultipleDockerComposes(dockerComposeFileList)
-    if err != nil {
-        return err
-    }
-    // fmt.Println(dockerCompose)   // 4debug
+    // dockerCompose, err := schema.LoadMultipleDockerComposes(dockerComposeFileList)
+    // if err != nil {
+    //     return err
+    // }
+    // // fmt.Println(dockerCompose)   // 4debug
 
-    for definedService, _ := range dockerCompose.Services {
-        if serviceName == definedService {
+    // for definedService, _ := range dockerCompose.Services {
+    //     if serviceName == definedService {
             return nil
-        }
-    }
-    return fmt.Errorf(
-        "[Error] service = '%s' not exists in docker-compose.yml files (%v) .",
-        serviceName,
-        strings.Join(dockerComposeFileList, ", "),
-    )
+    //     }
+    // }
+    // return fmt.Errorf(
+    //     "[Error] service = '%s' not exists in docker-compose.yml files (%v) .",
+    //     serviceName,
+    //     strings.Join(dockerComposeFileList, ", "),
+    // )
 }
 
 func getRuntimeMountPoints(serviceName string) (string, string, error) {
