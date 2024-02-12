@@ -50,7 +50,6 @@ func TestConvertTargetToSourceSuccess(t * testing.T) {
 	cases := providerTestConvertTargetToSourceSuccess()
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
-			c := c
 			t.Parallel()
 			bm := BindMount{c.source, c.target}
 			actual, err := bm.ConvertTargetToSource(c.path)
@@ -91,7 +90,6 @@ func TestResolveTargetToSourceFail(t * testing.T) {
 	cases := providerTestConvertTargetToSourceFail()
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
-			c := c
 			t.Parallel()
 			bm := BindMount{c.source, c.target}
 			result, err := bm.ConvertTargetToSource(c.path)

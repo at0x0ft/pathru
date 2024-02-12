@@ -64,7 +64,6 @@ func TestResolveSuccess(t * testing.T) {
 	cases := providerTestResolveSuccess()
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
-			c := c
 			t.Parallel()
 			pr := PathResolver{getMounts()}
 			actual, err := pr.Resolve(c.path, c.baseService, c.dstService)
@@ -105,7 +104,6 @@ func TestResolveSuccess(t * testing.T) {
 // 	cases := providerTestResolveTargetToSourceFail()
 // 	for name, c := range cases {
 // 		t.Run(name, func(t *testing.T) {
-// 			c := c
 // 			t.Parallel()
 // 			bm := BindMount{c.source, c.target}
 // 			result, err := bm.ResolveTargetToSource(c.path)
