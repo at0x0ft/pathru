@@ -2,19 +2,18 @@ package parser
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"strings"
-    "gopkg.in/yaml.v3"
+	"gopkg.in/yaml.v3"
 	"github.com/at0x0ft/pathru/pkg/mount"
 )
 
 type ComposeYamlParser struct {
-	content string
+	Content string
 }
 
 type ComposeYamlTop struct {
 	Services map[string]ComposeYamlService `yaml:"services"`
+	Volumes map[string]interface{} `yaml:"volumes"`
 }
 
 type ComposeYamlService struct {
@@ -23,7 +22,7 @@ type ComposeYamlService struct {
 
 func (mp *ComposeYamlParser) Parse() (map[string]mount.BindMount, error) {
 	var t ComposeYamlTop
-	if err := yaml.Unmarshal([]byte(mp.content), &t); err != nil {
+	if err := yaml.Unmarshal([]byte(mp.Content), &t); err != nil {
 		return nil, err
 	}
 
@@ -32,7 +31,7 @@ func (mp *ComposeYamlParser) Parse() (map[string]mount.BindMount, error) {
 		for _, rv := range s.Volumes {
 			switch v := rv.(type) {
 			case string:
-				m, isBind, err := mp.parseShort(v)
+				m, isBind, err := mp.parseShort(v, t.Volumes)
 				if err != nil {
 					return nil, err
 				} else if !isBind {
@@ -61,7 +60,7 @@ func (mp *ComposeYamlParser) Parse() (map[string]mount.BindMount, error) {
 	return res, nil
 }
 
-func (mp *ComposeYamlParser) parseShort(content string) (mount.BindMount, bool, error) {
+func (mp *ComposeYamlParser) parseShort(content string, volumes map[string]interface{}) (mount.BindMount, bool, error) {
 	paths := strings.Split(content, ":")
 	if len(paths) < 2 {
 		return mount.BindMount{}, false, fmt.Errorf(
@@ -69,11 +68,11 @@ func (mp *ComposeYamlParser) parseShort(content string) (mount.BindMount, bool, 
 			content,
 		)
 	}
-
-	if _, err := os.Stat(filepath.Clean(paths[0])); err != nil {
+	src, tgt := paths[0], paths[1]
+	if _, exists := volumes[src]; exists {
 		return mount.BindMount{}, false, nil
 	}
-	return mount.BindMount{paths[0],paths[1]}, true, nil
+	return mount.BindMount{src,tgt}, true, nil
 }
 
 func (mp *ComposeYamlParser) parseLong(content map[string]interface{}) (mount.BindMount, bool, error) {
