@@ -1,10 +1,10 @@
 version: "3.7"
 
 x-general_config: &general_config
-  image: golang:1.20
-  working_dir: /workspace
+  image: golang:1.22
+  working_dir: /go/src
   volumes:
-    - .:/workspace
+    - .:/go/src
     - /etc/passwd:/etc/passwd:ro
     - /etc/group:/etc/group:ro
     - ./.go_build/cache:/tmp/.cache
