@@ -1,6 +1,6 @@
 .PHONY: build
 build:
-	docker compose run --rm -u "$$(id -u):$$(id -g)" build github.com/at0x0ft/pathru/cmd/pathru
+	docker compose run --rm -u "$$(id -u):$$(id -g)" build github.com/at0x0ft/pathru
 
 .PHONY: stat
 stat:
