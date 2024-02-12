@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:experimental
-ARG GO_VERSION=1.19
+ARG GO_VERSION=1.22
 ARG DEBIAN_VERSION=11-slim
 FROM golang:${GO_VERSION} as base
 
