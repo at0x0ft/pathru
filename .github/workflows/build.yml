@@ -7,10 +7,15 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      GHA_GO_VERSION_SEMVAR: '^1.22.0'
     steps:
     - uses: actions/checkout@v3
 
-    - uses: ./.github/actions/base
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: $GHA_GO_VERSION_SEMVAR
 
     - name: Build
       run: go build -v ./...
