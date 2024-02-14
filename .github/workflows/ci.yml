@@ -20,7 +20,7 @@ jobs:
         go-version: ${{ env.GHA_GO_VERSION_SEMVAR }}
 
     - name: Test
-      run: go test -v ./...
+      run: make ci_test
 
     - name: lint
       uses: reviewdog/action-golangci-lint@v2
@@ -30,4 +30,4 @@ jobs:
         cache: false  # disable cache for consistent CI running
 
     - name: format
-      run: go fmt ./...
+      run: make ci_format

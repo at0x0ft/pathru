@@ -14,12 +14,6 @@ x-general_config: &general_config
 
 
 services:
-  build:
-    <<: *general_config
-    entrypoint: go build -o ./bin -ldflags "-s -w"
-  run:
-    <<: *general_config
-    entrypoint: go run
   go:
     <<: *general_config
     entrypoint: go
