@@ -15,7 +15,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: $GHA_GO_VERSION_SEMVAR
+        go-version: ${{ env.GHA_GO_VERSION_SEMVAR }}
 
     - name: Build
       run: go build -v ./...

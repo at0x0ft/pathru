@@ -17,7 +17,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: $GHA_GO_VERSION_SEMVAR
+        go-version: ${{ env.GHA_GO_VERSION_SEMVAR }}
 
     - name: Test
       run: go test -v ./...
@@ -26,4 +26,4 @@ jobs:
       uses: reviewdog/action-golangci-lint@v2
       with:
         golang_ci_lint_flags: "--enable-all --exclude-use-default=false"
-        go_version: $GHA_GO_VERSION_SEMVAR
+        go_version: ${{ env.GHA_GO_VERSION_SEMVAR }}
