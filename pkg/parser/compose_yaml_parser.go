@@ -2,9 +2,9 @@ package parser
 
 import (
 	"fmt"
-	"strings"
-	"gopkg.in/yaml.v3"
 	"github.com/at0x0ft/pathru/pkg/mount"
+	"gopkg.in/yaml.v3"
+	"strings"
 )
 
 type ComposeYamlParser struct {
@@ -13,7 +13,7 @@ type ComposeYamlParser struct {
 
 type ComposeYamlTop struct {
 	Services map[string]ComposeYamlService `yaml:"services"`
-	Volumes map[string]interface{} `yaml:"volumes"`
+	Volumes  map[string]interface{}        `yaml:"volumes"`
 }
 
 type ComposeYamlService struct {
@@ -38,7 +38,6 @@ func (mp *ComposeYamlParser) Parse() (map[string]mount.BindMount, error) {
 					continue
 				}
 				res[n] = m
-				break
 			case map[string]interface{}:
 				m, isBind, err := mp.parseLong(v)
 				if err != nil {
@@ -47,7 +46,6 @@ func (mp *ComposeYamlParser) Parse() (map[string]mount.BindMount, error) {
 					continue
 				}
 				res[n] = m
-				break
 			default:
 				return nil, fmt.Errorf(
 					"wrong compose volume format [\"%s\"]",
@@ -72,7 +70,7 @@ func (mp *ComposeYamlParser) parseShort(content string, volumes map[string]inter
 	if _, exists := volumes[src]; exists {
 		return mount.BindMount{}, false, nil
 	}
-	return mount.BindMount{src,tgt}, true, nil
+	return mount.BindMount{Source: src, Target: tgt}, true, nil
 }
 
 func (mp *ComposeYamlParser) parseLong(content map[string]interface{}) (mount.BindMount, bool, error) {
@@ -103,5 +101,5 @@ func (mp *ComposeYamlParser) parseLong(content map[string]interface{}) (mount.Bi
 			rt,
 		)
 	}
-	return mount.BindMount{s, t}, true, nil
+	return mount.BindMount{Source: s, Target: t}, true, nil
 }

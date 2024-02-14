@@ -12,11 +12,11 @@ type BindMount struct {
 }
 
 func (bm *BindMount) ConvertSourceToTarget(pathInSource string) (string, error) {
-	return bm.convert(pathInSource, bm.Source, bm.Target);
+	return bm.convert(pathInSource, bm.Source, bm.Target)
 }
 
 func (bm *BindMount) ConvertTargetToSource(pathInTarget string) (string, error) {
-	return bm.convert(pathInTarget, bm.Target, bm.Source);
+	return bm.convert(pathInTarget, bm.Target, bm.Source)
 }
 
 func (bm *BindMount) convert(path, base, dst string) (string, error) {

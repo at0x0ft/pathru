@@ -1,0 +1,33 @@
+name: CI for Go
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    env:
+      GHA_GO_VERSION_SEMVAR: '^1.22.0'
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: ${{ env.GHA_GO_VERSION_SEMVAR }}
+
+    - name: Test
+      run: go test -v ./...
+
+    - name: lint
+      uses: reviewdog/action-golangci-lint@v2
+      with:
+        golang_ci_lint_flags: "--enable-all --exclude-use-default=false"
+        go_version: ${{ env.GHA_GO_VERSION_SEMVAR }}
+        cache: false  # disable cache for consistent CI running
+
+    - name: format
+      run: go fmt ./...

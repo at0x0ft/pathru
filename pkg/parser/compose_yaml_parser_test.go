@@ -1,9 +1,9 @@
 package parser
 
 import (
-	"testing"
-	"os"
 	"github.com/at0x0ft/pathru/pkg/mount"
+	"os"
+	"testing"
 )
 
 func TestMain(t *testing.M) {
@@ -11,21 +11,8 @@ func TestMain(t *testing.M) {
 	os.Exit(code)
 }
 
-func getMounts() map[string]mount.BindMount {
-	return map[string]mount.BindMount {
-		"base_shell": mount.BindMount{
-			"/home/testuser/Programming/test_project",
-			"/workspace",
-		},
-		"golang": mount.BindMount{
-			"/home/testuser/Programming/test_project/golang",
-			"/go/src",
-		},
-	}
-}
-
 type ParseComposeYamlSuccessTestCase struct {
-	content string
+	content  string
 	expected map[string]mount.BindMount
 }
 
@@ -48,8 +35,8 @@ volumes:
 `,
 			map[string]mount.BindMount{
 				"base_shell": mount.BindMount{
-					"./src",
-					"/workspace",
+					Source: "./src",
+					Target: "/workspace",
 				},
 			},
 		},
@@ -69,12 +56,12 @@ services:
 `,
 			map[string]mount.BindMount{
 				"base_shell": mount.BindMount{
-					".",
-					"/workspace",
+					Source: ".",
+					Target: "/workspace",
 				},
 				"golang": mount.BindMount{
-					"/home/testuser/Programming/test_project/golang",
-					"/go/src",
+					Source: "/home/testuser/Programming/test_project/golang",
+					Target: "/go/src",
 				},
 			},
 		},
@@ -93,7 +80,7 @@ volumes:
 	}
 }
 
-func TestParseComposeYamlSuccess(t * testing.T) {
+func TestParseComposeYamlSuccess(t *testing.T) {
 	cases := providerTestParseComposeYamlSuccess()
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
