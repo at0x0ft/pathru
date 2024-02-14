@@ -1,15 +1,13 @@
 name: base action for Go
 
-jobs:
-  base:
-    runs-on: ubuntu-latest
-    env:
+env:
       GHA_GO_VERSION_SEMVAR: '^1.22.0'
-    steps:
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: $GHA_GO_VERSION_SEMVAR
 
-    - name: Display Go version
-      run: go version
+runs:
+  - name: Set up Go
+    uses: actions/setup-go@v4
+    with:
+      go-version: $GHA_GO_VERSION_SEMVAR
+
+  - name: Display Go version
+    run: go version
