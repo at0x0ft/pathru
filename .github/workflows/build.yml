@@ -1,0 +1,14 @@
+name: build for Go
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: ./.github/workflows/base.yml
+
+    - name: Build
+      run: go build -v ./...

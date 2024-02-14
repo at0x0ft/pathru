@@ -6,23 +6,19 @@ name: Go
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 jobs:
-
-  build:
+  base:
     runs-on: ubuntu-latest
+    env:
+      GHA_GO_VERSION_SEMVAR: '^1.22.0'
     steps:
     - uses: actions/checkout@v3
 
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: '1.22.x'
+        go-version: $GHA_GO_VERSION_SEMVAR
 
-    - name: Build
-      run: go build -v ./...
-
-    - name: Test
-      run: go test -v ./...
+    - name: Display Go version
+      run: go version

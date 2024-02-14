@@ -1,0 +1,19 @@
+name: lint for Go
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: ./.github/workflows/base.yml
+
+    - name: lint
+      uses: reviewdog/action-golangci-lint@v2
+      with:
+        golang_ci_lint_flags: "--enable-all --exclude-use-default=false"
+        go_version: ${{ jobs.base.env.GHA_GO_VERSION_SEMVAR }}
