@@ -1,14 +1,20 @@
+docker_compose_run := docker compose run --rm -u "$$(id -u):$$(id -g)"
+
+common_build_command := go build -o ./bin -ldflags "-s -w" ./...
+common_test_command := go test -v ./...
+common_format_command := go fmt ./...
+
 .PHONY: build
 build:
-	docker compose run --rm -u "$$(id -u):$$(id -g)" build github.com/at0x0ft/pathru
+	$(docker_compose_run) $(common_build_command)
 
 .PHONY: stat
 stat:
-	docker compose run --rm -u "$$(id -u):$$(id -g)" go version -m ./bin/*
+	$(docker_compose_run) go version -m ./bin/*
 
-.PHONY: update
-update:
-	docker compose run --rm -u "$$(id -u):$$(id -g)" go mod tidy
+.PHONY: pkg_update
+pkg_update:
+	$(docker_compose_run) go mod tidy
 
 .PHONY: clean
 clean:
@@ -22,12 +28,30 @@ cache_clear:
 
 .PHONY: test
 test:
-	docker compose run --rm -u "$$(id -u):$$(id -g)" go test -v ./...
+	$(docker_compose_run) $(common_test_command)
 
-.PHONY: lint_light
-lint_light:
-	docker compose run --rm -u "$$(id -u):$$(id -g)" go vet ./...
+.PHONY: lint
+lint:
+	$(docker_compose_run) go vet ./...
 
 .PHONY: format
 format:
-	docker compose run --rm -u "$$(id -u):$$(id -g)" go fmt ./...
+	$(docker_compose_run) $(common_format_command)
+
+# === commands for CI ===
+
+.PHONY: ci_build
+ci_build:
+	$(common_build_command)
+
+.PHONY: ci_test
+ci_test:
+	$(common_test_command)
+
+# .PHONY: ci_lint
+# ci_lint:
+#	:	# ci_lint command defined in GHA workflow file.
+
+.PHONY: ci_format
+ci_format:
+	$(common_format_command)
