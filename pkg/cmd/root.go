@@ -79,7 +79,7 @@ func execBody(files []string, args []string) error {
 	args = args[1:]
 
 	mergedComposeFiles := mergeComposeFiles(files)
-	p := parser.ComposeYamlParser{mergedComposeFiles}
+	p := parser.ComposeYamlParser{Content: mergedComposeFiles}
 
 	var err error
 	var mounts map[string]mount.BindMount
@@ -107,106 +107,106 @@ func mergeComposeFiles(files []string) string {
 	return ""
 }
 
-func tryResolvingPath(arg string) (bool, string) {
-	// [Warning] naive implementation
-	absPath, err := filepath.Abs(arg)
-	if err != nil {
-		return false, ""
-	}
-	_, err = os.Stat(absPath)
-	if err != nil {
-		return false, ""
-	}
-	return true, absPath
-}
+// func tryResolvingPath(arg string) (bool, string) {
+// 	// [Warning] naive implementation
+// 	absPath, err := filepath.Abs(arg)
+// 	if err != nil {
+// 		return false, ""
+// 	}
+// 	_, err = os.Stat(absPath)
+// 	if err != nil {
+// 		return false, ""
+// 	}
+// 	return true, absPath
+// }
 
-func getDockerComposeFileAbsPathList() ([]string, error) {
-	// devcontainerDirPath := filepath.Join(os.Getenv(SrcMountPointEnv), DevContainerDirname)
-	// devcontainer, err := schema.LoadDevcontainer(devcontainerDirPath)
-	// if err != nil {
-	// return nil, err
-	return nil, nil
-	// }
+// func getDockerComposeFileAbsPathList() ([]string, error) {
+// 	// devcontainerDirPath := filepath.Join(os.Getenv(SrcMountPointEnv), DevContainerDirname)
+// 	// devcontainer, err := schema.LoadDevcontainer(devcontainerDirPath)
+// 	// if err != nil {
+// 	// return nil, err
+// 	return nil, nil
+// 	// }
 
-	// var absPathList []string
-	// for _, dockerComposeFileRelpath := range devcontainer.DockerComposeFile {
-	//	 absPathList = append(absPathList, filepath.Join(devcontainerDirPath, dockerComposeFileRelpath))
-	// }
-	// return absPathList, nil
-}
+// 	// var absPathList []string
+// 	// for _, dockerComposeFileRelpath := range devcontainer.DockerComposeFile {
+// 	//	 absPathList = append(absPathList, filepath.Join(devcontainerDirPath, dockerComposeFileRelpath))
+// 	// }
+// 	// return absPathList, nil
+// }
 
-func serviceExists(serviceName string, dockerComposeFileList []string) error {
-	// dockerCompose, err := schema.LoadMultipleDockerComposes(dockerComposeFileList)
-	// if err != nil {
-	//	 return err
-	// }
-	// // fmt.Println(dockerCompose)   // 4debug
+// func serviceExists(serviceName string, dockerComposeFileList []string) error {
+// 	// dockerCompose, err := schema.LoadMultipleDockerComposes(dockerComposeFileList)
+// 	// if err != nil {
+// 	//	 return err
+// 	// }
+// 	// // fmt.Println(dockerCompose)   // 4debug
 
-	// for definedService, _ := range dockerCompose.Services {
-	//	 if serviceName == definedService {
-	return nil
-	//	 }
-	// }
-	// return fmt.Errorf(
-	//	 "[Error] service = '%s' not exists in docker-compose.yml files (%v) .",
-	//	 serviceName,
-	//	 strings.Join(dockerComposeFileList, ", "),
-	// )
-}
+// 	// for definedService, _ := range dockerCompose.Services {
+// 	//	 if serviceName == definedService {
+// 	return nil
+// 	//	 }
+// 	// }
+// 	// return fmt.Errorf(
+// 	//	 "[Error] service = '%s' not exists in docker-compose.yml files (%v) .",
+// 	//	 serviceName,
+// 	//	 strings.Join(dockerComposeFileList, ", "),
+// 	// )
+// }
 
-func getRuntimeMountPoints(serviceName string) (string, string, error) {
-	dockerComposeFileList, err := getDockerComposeFileAbsPathList()
-	if err != nil {
-		return "", "", err
-	}
+// func getRuntimeMountPoints(serviceName string) (string, string, error) {
+// 	dockerComposeFileList, err := getDockerComposeFileAbsPathList()
+// 	if err != nil {
+// 		return "", "", err
+// 	}
 
-	if err := serviceExists(serviceName, dockerComposeFileList); err != nil {
-		return "", "", err
-	}
+// 	if err := serviceExists(serviceName, dockerComposeFileList); err != nil {
+// 		return "", "", err
+// 	}
 
-	// os.Exit(1)  // 4debug
-	// TODO: implement later
+// 	// os.Exit(1)  // 4debug
+// 	// TODO: implement later
 
-	// 3. get runtime container mount point path
-	// 4. (host) source-path, (container) destination-path, error
-	return "", "", nil
-}
+// 	// 3. get runtime container mount point path
+// 	// 4. (host) source-path, (container) destination-path, error
+// 	return "", "", nil
+// }
 
-func convertPath(baseAbsPath string, runtimeServiceName string) (string, error) {
-	runtimeSrcMountPoint, runtimeDstMountPoint, err := getRuntimeMountPoints(runtimeServiceName)
-	if err != nil {
-		return "", err
-	}
+// func convertPath(baseAbsPath string, runtimeServiceName string) (string, error) {
+// 	runtimeSrcMountPoint, runtimeDstMountPoint, err := getRuntimeMountPoints(runtimeServiceName)
+// 	if err != nil {
+// 		return "", err
+// 	}
 
-	hostAbsPath, err := filepath.Rel(os.Getenv(SrcMountPointEnv), baseAbsPath)
-	if err != nil {
-		return "", err
-	}
-	runtimeDstRelPath, err := filepath.Rel(runtimeSrcMountPoint, hostAbsPath)
-	if err != nil {
-		return "", err
-	}
-	runtimeDstAbsPath := filepath.Join(runtimeDstMountPoint, runtimeDstRelPath)
-	return runtimeDstAbsPath, nil
-}
+// 	hostAbsPath, err := filepath.Rel(os.Getenv(SrcMountPointEnv), baseAbsPath)
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	runtimeDstRelPath, err := filepath.Rel(runtimeSrcMountPoint, hostAbsPath)
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	runtimeDstAbsPath := filepath.Join(runtimeDstMountPoint, runtimeDstRelPath)
+// 	return runtimeDstAbsPath, nil
+// }
 
-func convertPathIfFileExists(runtimeServiceName string, executeCommand string, args []string) ([]string, error) {
-	result := []string{runtimeServiceName, executeCommand}
-	var err error
-	for _, arg := range args {
-		isFilePath, absPath := tryResolvingPath(arg)
-		if !isFilePath {
-			continue
-		}
+// func convertPathIfFileExists(runtimeServiceName string, executeCommand string, args []string) ([]string, error) {
+// 	result := []string{runtimeServiceName, executeCommand}
+// 	var err error
+// 	for _, arg := range args {
+// 		isFilePath, absPath := tryResolvingPath(arg)
+// 		if !isFilePath {
+// 			continue
+// 		}
 
-		arg, err = convertPath(absPath, runtimeServiceName)
-		if err != nil {
-			return nil, err
-		}
-		result = append(result, arg)
-	}
-	return result, nil
-}
+// 		arg, err = convertPath(absPath, runtimeServiceName)
+// 		if err != nil {
+// 			return nil, err
+// 		}
+// 		result = append(result, arg)
+// 	}
+// 	return result, nil
+// }
 
 func execDockerCompose(args []string) (string, int) {
 	args = append([]string{"run", "--rm"}, args...)

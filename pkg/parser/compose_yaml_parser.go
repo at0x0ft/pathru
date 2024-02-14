@@ -38,7 +38,6 @@ func (mp *ComposeYamlParser) Parse() (map[string]mount.BindMount, error) {
 					continue
 				}
 				res[n] = m
-				break
 			case map[string]interface{}:
 				m, isBind, err := mp.parseLong(v)
 				if err != nil {
@@ -47,7 +46,6 @@ func (mp *ComposeYamlParser) Parse() (map[string]mount.BindMount, error) {
 					continue
 				}
 				res[n] = m
-				break
 			default:
 				return nil, fmt.Errorf(
 					"wrong compose volume format [\"%s\"]",

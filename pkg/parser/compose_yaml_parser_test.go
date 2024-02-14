@@ -11,19 +11,6 @@ func TestMain(t *testing.M) {
 	os.Exit(code)
 }
 
-func getMounts() map[string]mount.BindMount {
-	return map[string]mount.BindMount{
-		"base_shell": mount.BindMount{
-			"/home/testuser/Programming/test_project",
-			"/workspace",
-		},
-		"golang": mount.BindMount{
-			"/home/testuser/Programming/test_project/golang",
-			"/go/src",
-		},
-	}
-}
-
 type ParseComposeYamlSuccessTestCase struct {
 	content  string
 	expected map[string]mount.BindMount

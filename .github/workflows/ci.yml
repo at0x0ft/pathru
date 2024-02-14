@@ -27,6 +27,7 @@ jobs:
       with:
         golang_ci_lint_flags: "--enable-all --exclude-use-default=false"
         go_version: ${{ env.GHA_GO_VERSION_SEMVAR }}
+        cache: false  # disable cache for consistent CI running
 
     - name: format
       run: go fmt -v ./...
