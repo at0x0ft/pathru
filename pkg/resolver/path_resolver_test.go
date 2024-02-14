@@ -1,9 +1,9 @@
 package resolver
 
 import (
-	"testing"
-	"os"
 	"github.com/at0x0ft/pathru/pkg/mount"
+	"os"
+	"testing"
 )
 
 func TestMain(t *testing.M) {
@@ -12,7 +12,7 @@ func TestMain(t *testing.M) {
 }
 
 func getMounts() map[string]mount.BindMount {
-	return map[string]mount.BindMount {
+	return map[string]mount.BindMount{
 		"base_shell": mount.BindMount{
 			"/home/testuser/Programming/test_project",
 			"/workspace",
@@ -25,10 +25,10 @@ func getMounts() map[string]mount.BindMount {
 }
 
 type ResolveSuccessTestCase struct {
-	path string
+	path        string
 	baseService string
-	dstService string
-	expected string
+	dstService  string
+	expected    string
 }
 
 func providerTestResolveSuccess() map[string]ResolveSuccessTestCase {
@@ -60,7 +60,7 @@ func providerTestResolveSuccess() map[string]ResolveSuccessTestCase {
 	}
 }
 
-func TestResolveSuccess(t * testing.T) {
+func TestResolveSuccess(t *testing.T) {
 	cases := providerTestResolveSuccess()
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {

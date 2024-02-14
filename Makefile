@@ -23,3 +23,7 @@ cache_clear:
 .PHONY: test
 test:
 	docker compose run --rm -u "$$(id -u):$$(id -g)" go test -v ./...
+
+.PHONY: format
+format:
+	docker compose run --rm -u "$$(id -u):$$(id -g)" go fmt ./...

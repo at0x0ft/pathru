@@ -1,16 +1,15 @@
 /*
 Copyright © 2023 at0x0ft <26642966+at0x0ft@users.noreply.github.com>
-
 */
 package cmd
 
-import "fmt"	// 4debug
+import "fmt" // 4debug
 import (
+	"github.com/spf13/cobra"
 	"os"
 	"os/exec"
-	"strings"
 	"path/filepath"
-	"github.com/spf13/cobra"
+	"strings"
 	// "github.com/at0x0ft/pathru/internal/pkg/schema"
 	"github.com/at0x0ft/pathru/pkg/mount"
 	"github.com/at0x0ft/pathru/pkg/parser"
@@ -18,9 +17,9 @@ import (
 )
 
 const (
-	SrcMountPointEnv = "CONTAINER_WORKSPACE_FOLDER"
-	HostMountPointEnv = "LOCAL_WORKSPACE_FOLDER"
-	DevContainerDirname = ".devcontainer"
+	SrcMountPointEnv     = "CONTAINER_WORKSPACE_FOLDER"
+	HostMountPointEnv    = "LOCAL_WORKSPACE_FOLDER"
+	DevContainerDirname  = ".devcontainer"
 	BaseShellServiceName = "base_shell"
 )
 
@@ -125,8 +124,8 @@ func getDockerComposeFileAbsPathList() ([]string, error) {
 	// devcontainerDirPath := filepath.Join(os.Getenv(SrcMountPointEnv), DevContainerDirname)
 	// devcontainer, err := schema.LoadDevcontainer(devcontainerDirPath)
 	// if err != nil {
-		// return nil, err
-		return nil, nil
+	// return nil, err
+	return nil, nil
 	// }
 
 	// var absPathList []string
@@ -145,7 +144,7 @@ func serviceExists(serviceName string, dockerComposeFileList []string) error {
 
 	// for definedService, _ := range dockerCompose.Services {
 	//	 if serviceName == definedService {
-			return nil
+	return nil
 	//	 }
 	// }
 	// return fmt.Errorf(
@@ -192,7 +191,7 @@ func convertPath(baseAbsPath string, runtimeServiceName string) (string, error) 
 }
 
 func convertPathIfFileExists(runtimeServiceName string, executeCommand string, args []string) ([]string, error) {
-	result := []string {runtimeServiceName, executeCommand}
+	result := []string{runtimeServiceName, executeCommand}
 	var err error
 	for _, arg := range args {
 		isFilePath, absPath := tryResolvingPath(arg)
@@ -219,8 +218,8 @@ func execDockerCompose(args []string) (string, int) {
 	// 	result += err.Error()
 	// }
 	// return result, cmd.ProcessState.ExitCode()
-	fmt.Println(cmd)	// 4debug
-	return "", 0	// 4debug
+	fmt.Println(cmd) // 4debug
+	return "", 0     // 4debug
 }
 
 func pathExists(path string) bool {

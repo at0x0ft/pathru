@@ -27,3 +27,6 @@ jobs:
       with:
         golang_ci_lint_flags: "--enable-all --exclude-use-default=false"
         go_version: ${{ env.GHA_GO_VERSION_SEMVAR }}
+
+    - name: format
+      run: go fmt -v ./...

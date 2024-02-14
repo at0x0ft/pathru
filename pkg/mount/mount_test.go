@@ -1,8 +1,8 @@
 package mount
 
 import (
-	"testing"
 	"os"
+	"testing"
 )
 
 func TestMain(t *testing.M) {
@@ -11,9 +11,9 @@ func TestMain(t *testing.M) {
 }
 
 type ConvertTargetToSourceSuccessTestCase struct {
-	source string
-	target string
-	path string
+	source   string
+	target   string
+	path     string
 	expected string
 }
 
@@ -46,7 +46,7 @@ func providerTestConvertTargetToSourceSuccess() map[string]ConvertTargetToSource
 	}
 }
 
-func TestConvertTargetToSourceSuccess(t * testing.T) {
+func TestConvertTargetToSourceSuccess(t *testing.T) {
 	cases := providerTestConvertTargetToSourceSuccess()
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
@@ -69,9 +69,9 @@ func TestConvertTargetToSourceSuccess(t * testing.T) {
 }
 
 type ConvertTargetToSourceFailTestCase struct {
-	source string
-	target string
-	path string
+	source      string
+	target      string
+	path        string
 	expectedMsg string
 }
 
@@ -86,7 +86,7 @@ func providerTestConvertTargetToSourceFail() map[string]ConvertTargetToSourceFai
 	}
 }
 
-func TestResolveTargetToSourceFail(t * testing.T) {
+func TestResolveTargetToSourceFail(t *testing.T) {
 	cases := providerTestConvertTargetToSourceFail()
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
