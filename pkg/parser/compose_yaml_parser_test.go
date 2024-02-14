@@ -35,8 +35,8 @@ volumes:
 `,
 			map[string]mount.BindMount{
 				"base_shell": mount.BindMount{
-					"./src",
-					"/workspace",
+					Source: "./src",
+					Target: "/workspace",
 				},
 			},
 		},
@@ -56,12 +56,12 @@ services:
 `,
 			map[string]mount.BindMount{
 				"base_shell": mount.BindMount{
-					".",
-					"/workspace",
+					Source: ".",
+					Target: "/workspace",
 				},
 				"golang": mount.BindMount{
-					"/home/testuser/Programming/test_project/golang",
-					"/go/src",
+					Source: "/home/testuser/Programming/test_project/golang",
+					Target: "/go/src",
 				},
 			},
 		},

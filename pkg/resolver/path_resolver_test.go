@@ -14,12 +14,12 @@ func TestMain(t *testing.M) {
 func getMounts() map[string]mount.BindMount {
 	return map[string]mount.BindMount{
 		"base_shell": mount.BindMount{
-			"/home/testuser/Programming/test_project",
-			"/workspace",
+			Source: "/home/testuser/Programming/test_project",
+			Target: "/workspace",
 		},
 		"golang": mount.BindMount{
-			"/home/testuser/Programming/test_project/golang",
-			"/go/src",
+			Source: "/home/testuser/Programming/test_project/golang",
+			Target: "/go/src",
 		},
 	}
 }

@@ -70,7 +70,7 @@ func (mp *ComposeYamlParser) parseShort(content string, volumes map[string]inter
 	if _, exists := volumes[src]; exists {
 		return mount.BindMount{}, false, nil
 	}
-	return mount.BindMount{src, tgt}, true, nil
+	return mount.BindMount{Source: src, Target: tgt}, true, nil
 }
 
 func (mp *ComposeYamlParser) parseLong(content map[string]interface{}) (mount.BindMount, bool, error) {
@@ -101,5 +101,5 @@ func (mp *ComposeYamlParser) parseLong(content map[string]interface{}) (mount.Bi
 			rt,
 		)
 	}
-	return mount.BindMount{s, t}, true, nil
+	return mount.BindMount{Source: s, Target: t}, true, nil
 }

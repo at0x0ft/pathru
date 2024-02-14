@@ -46,7 +46,7 @@ Usage: pathru <runtime service name> <execute command> -- [command arguments & o
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
-		fmt.Errorf("%s\n", err.Error())
+		fmt.Printf("%s\n", err.Error())
 		os.Exit(1)
 	}
 }
@@ -228,7 +228,7 @@ func pathExists(path string) bool {
 }
 
 func resolveArgs(args []string, runtimeServiceName string, mounts map[string]mount.BindMount) ([]string, error) {
-	r := resolver.PathResolver{mounts}
+	r := resolver.PathResolver{Mounts: mounts}
 	res := make([]string, len(args))
 	for _, arg := range args {
 		if pathExists(arg) {

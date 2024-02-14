@@ -24,6 +24,10 @@ cache_clear:
 test:
 	docker compose run --rm -u "$$(id -u):$$(id -g)" go test -v ./...
 
+.PHONY: lint_light
+lint_light:
+	docker compose run --rm -u "$$(id -u):$$(id -g)" go vet ./...
+
 .PHONY: format
 format:
 	docker compose run --rm -u "$$(id -u):$$(id -g)" go fmt ./...
