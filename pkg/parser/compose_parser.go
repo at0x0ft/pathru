@@ -8,15 +8,6 @@ import (
 
 type ComposeParser struct{}
 
-type ComposeYamlTop struct {
-	Services map[string]ComposeYamlService `yaml:"services"`
-	Volumes  map[string]interface{}        `yaml:"volumes"`
-}
-
-type ComposeYamlService struct {
-	Volumes []interface{} `yaml:"volumes"`
-}
-
 func (mp *ComposeParser) Parse(configPaths []string) (map[string]mount.BindMount, error) {
 	opts, err := cli.NewProjectOptions(
 		configPaths,
