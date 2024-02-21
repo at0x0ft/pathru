@@ -100,10 +100,6 @@ func execBody(files []string, args []string) error {
 	return nil
 }
 
-func mergeComposeFiles(files []string) string {
-	return ""
-}
-
 // func tryResolvingPath(arg string) (bool, string) {
 // 	// [Warning] naive implementation
 // 	absPath, err := filepath.Abs(arg)
