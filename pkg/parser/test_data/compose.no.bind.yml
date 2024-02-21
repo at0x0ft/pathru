@@ -1,0 +1,7 @@
+services:
+  base_shell:
+    image: example/base_shell
+    volumes:
+      - src:/workspace
+volumes:
+  src:

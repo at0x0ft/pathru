@@ -78,12 +78,9 @@ func execBody(files []string, args []string) error {
 	// args = args[2:]
 	args = args[1:]
 
-	mergedComposeFiles := mergeComposeFiles(files)
-	p := parser.ComposeYamlParser{Content: mergedComposeFiles}
-
 	var err error
 	var mounts map[string]mount.BindMount
-	mounts, err = p.Parse()
+	mounts, err = (&parser.ComposeParser{}).Parse([]string{})
 	if err != nil {
 		return err
 	}
@@ -101,10 +98,6 @@ func execBody(files []string, args []string) error {
 	}
 	fmt.Printf("%s\n", output)
 	return nil
-}
-
-func mergeComposeFiles(files []string) string {
-	return ""
 }
 
 // func tryResolvingPath(arg string) (bool, string) {
