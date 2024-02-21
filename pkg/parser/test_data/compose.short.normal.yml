@@ -1,0 +1,12 @@
+services:
+  base_shell:
+    image: example/base_shell
+    volumes:
+      - type: volume
+        source: db-data
+        target: /data
+        volume:
+          nocopy: true
+      - ./src:/workspace
+volumes:
+  db-data:

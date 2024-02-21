@@ -2,7 +2,9 @@ package parser
 
 import (
 	"github.com/at0x0ft/pathru/pkg/mount"
+	"log"
 	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -12,51 +14,41 @@ func TestMain(t *testing.M) {
 }
 
 type ParseComposeYamlSuccessTestCase struct {
-	content  string
-	expected map[string]mount.BindMount
+	configPaths []string
+	expected    map[string]mount.BindMount
 }
 
 func providerTestParseComposeYamlSuccess() map[string]ParseComposeYamlSuccessTestCase {
+	fixturePaths := map[string]string{
+		"short_normal": "./test_data/compose.short.normal.yml",
+		"long_normal":  "./test_data/compose.long.normal.yml",
+		"no_bind":      "./test_data/compose.no.bind.yml",
+	}
+	absContexts := make(map[string]string)
+	for n, path := range fixturePaths {
+		absPath, err := filepath.Abs(filepath.Dir(path))
+		if err != nil {
+			exitWithError(err)
+			return nil
+		}
+		absContexts[n] = absPath
+	}
+
 	return map[string]ParseComposeYamlSuccessTestCase{
 		"short syntax normal case": {
-			`
-services:
-  base_shell:
-    image: example/base_shell
-    volumes:
-      - type: volume
-        source: db-data
-        target: /data
-        volume:
-          nocopy: true
-      - ./src:/workspace
-volumes:
-  db-data:
-`,
+			[]string{fixturePaths["short_normal"]},
 			map[string]mount.BindMount{
 				"base_shell": mount.BindMount{
-					Source: "./src",
+					Source: filepath.Join(absContexts["short_normal"], "./src"),
 					Target: "/workspace",
 				},
 			},
 		},
 		"long syntax normal case": {
-			`
-services:
-  base_shell:
-    image: example/base_shell
-    volumes:
-      - .:/workspace
-  golang:
-    image: golang:1.22
-    volumes:
-      - type: bind
-        source: /home/testuser/Programming/test_project/golang
-        target: /go/src
-`,
+			[]string{fixturePaths["long_normal"]},
 			map[string]mount.BindMount{
 				"base_shell": mount.BindMount{
-					Source: ".",
+					Source: filepath.Join(absContexts["long_normal"], "."),
 					Target: "/workspace",
 				},
 				"golang": mount.BindMount{
@@ -66,16 +58,17 @@ services:
 			},
 		},
 		"short syntax not found bind case": {
-			`
-services:
-  base_shell:
-    image: example/base_shell
-    volumes:
-      - src:/workspace
-volumes:
-  src:
-`,
+			[]string{fixturePaths["no_bind"]},
 			map[string]mount.BindMount{},
+		},
+		"override case": {
+			[]string{fixturePaths["long_normal"], fixturePaths["short_normal"], fixturePaths["no_bind"]},
+			map[string]mount.BindMount{
+				"golang": mount.BindMount{
+					Source: "/home/testuser/Programming/test_project/golang",
+					Target: "/go/src",
+				},
+			},
 		},
 	}
 }
@@ -85,8 +78,8 @@ func TestParseComposeYamlSuccess(t *testing.T) {
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			p := ComposeYamlParser{c.content}
-			actual, err := p.Parse()
+			p := ComposeParser{}
+			actual, err := p.Parse(c.configPaths)
 			if err != nil {
 				t.Error(err)
 			}
@@ -115,4 +108,9 @@ func TestParseComposeYamlSuccess(t *testing.T) {
 			}
 		})
 	}
+}
+
+func exitWithError(err error) {
+	log.Println(err)
+	os.Exit(1)
 }

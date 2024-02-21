@@ -1,0 +1,11 @@
+services:
+  base_shell:
+    image: example/base_shell
+    volumes:
+      - .:/workspace
+  golang:
+    image: golang:1.22
+    volumes:
+      - type: bind
+        source: /home/testuser/Programming/test_project/golang
+        target: /go/src
