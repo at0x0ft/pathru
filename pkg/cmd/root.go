@@ -12,7 +12,7 @@ import (
 	"strings"
 	// "github.com/at0x0ft/pathru/internal/pkg/schema"
 	"github.com/at0x0ft/pathru/pkg/mount"
-	"github.com/at0x0ft/pathru/pkg/parser"
+	"github.com/at0x0ft/pathru/pkg/compose"
 	"github.com/at0x0ft/pathru/pkg/resolver"
 )
 
@@ -80,7 +80,7 @@ func execBody(files []string, args []string) error {
 
 	var err error
 	var mounts map[string]mount.BindMount
-	mounts, err = (&parser.ComposeParser{}).Parse([]string{})
+	mounts, err = (&compose.ComposeParser{}).Parse([]string{})
 	if err != nil {
 		return err
 	}
