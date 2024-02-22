@@ -11,8 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 	// "github.com/at0x0ft/pathru/internal/pkg/schema"
-	"github.com/at0x0ft/pathru/pkg/mount"
 	"github.com/at0x0ft/pathru/pkg/compose"
+	"github.com/at0x0ft/pathru/pkg/mount"
 	"github.com/at0x0ft/pathru/pkg/resolver"
 )
 
