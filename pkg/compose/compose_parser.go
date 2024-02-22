@@ -1,4 +1,4 @@
-package parser
+package compose
 
 import (
 	"github.com/at0x0ft/pathru/pkg/mount"

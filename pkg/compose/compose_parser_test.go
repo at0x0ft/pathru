@@ -1,8 +1,7 @@
-package parser
+package compose
 
 import (
 	"github.com/at0x0ft/pathru/pkg/mount"
-	"log"
 	"os"
 	"path/filepath"
 	"testing"
@@ -13,12 +12,12 @@ func TestMain(t *testing.M) {
 	os.Exit(code)
 }
 
-type ParseComposeYamlSuccessTestCase struct {
+type ParseSuccessTestCase struct {
 	configPaths []string
 	expected    map[string]mount.BindMount
 }
 
-func providerTestParseComposeYamlSuccess() map[string]ParseComposeYamlSuccessTestCase {
+func providerTestParseSuccess(t *testing.T) map[string]ParseSuccessTestCase {
 	fixturePaths := map[string]string{
 		"short_normal": "./test_data/compose.short.normal.yml",
 		"long_normal":  "./test_data/compose.long.normal.yml",
@@ -28,13 +27,13 @@ func providerTestParseComposeYamlSuccess() map[string]ParseComposeYamlSuccessTes
 	for n, path := range fixturePaths {
 		absPath, err := filepath.Abs(filepath.Dir(path))
 		if err != nil {
-			exitWithError(err)
+			t.Errorf("%v", err.Error())
 			return nil
 		}
 		absContexts[n] = absPath
 	}
 
-	return map[string]ParseComposeYamlSuccessTestCase{
+	return map[string]ParseSuccessTestCase{
 		"short syntax normal case": {
 			[]string{fixturePaths["short_normal"]},
 			map[string]mount.BindMount{
@@ -73,8 +72,8 @@ func providerTestParseComposeYamlSuccess() map[string]ParseComposeYamlSuccessTes
 	}
 }
 
-func TestParseComposeYamlSuccess(t *testing.T) {
-	cases := providerTestParseComposeYamlSuccess()
+func TestParseSuccess(t *testing.T) {
+	cases := providerTestParseSuccess(t)
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
@@ -108,9 +107,4 @@ func TestParseComposeYamlSuccess(t *testing.T) {
 			}
 		})
 	}
-}
-
-func exitWithError(err error) {
-	log.Println(err)
-	os.Exit(1)
 }
