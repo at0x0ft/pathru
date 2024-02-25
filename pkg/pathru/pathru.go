@@ -4,13 +4,13 @@ import "fmt" // 4debug
 import (
 	"github.com/at0x0ft/pathru/pkg/mount"
 	"github.com/at0x0ft/pathru/pkg/resolver"
-	docker_compose "github.com/docker/compose/v2/cmd/compose"
+	"github.com/docker/compose/v2/cmd/compose"
 	"os"
 	"os/exec"
 	"path/filepath"
 )
 
-func Process(opts *docker_compose.ProjectOptions, baseService string, runService string, args []string) error {
+func Process(opts *compose.ProjectOptions, baseService string, runService string, args []string) error {
 	mounts, err := (&mount.MountParser{}).Parse([]string{})
 	if err != nil {
 		return err
