@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/docker/compose/v2/cmd/compose"
 	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
@@ -12,12 +13,12 @@ func TestMain(t *testing.M) {
 	os.Exit(code)
 }
 
-type ParseComposeOptionsSuccessTestCase struct {
+type SetComposeOptionsSuccessTestCase struct {
 	args     []string
 	expected []string
 }
 
-func providerTestParseComposeOptionsSuccess(t *testing.T) map[string]ParseComposeOptionsSuccessTestCase {
+func providerTestSetComposeOptionsSuccess(t *testing.T) map[string]SetComposeOptionsSuccessTestCase {
 	fixturePaths := map[string]string{
 		"short_normal": "./test_data/compose.short.normal.yml",
 		"long_normal":  "./test_data/compose.long.normal.yml",
@@ -33,7 +34,7 @@ func providerTestParseComposeOptionsSuccess(t *testing.T) map[string]ParseCompos
 		absContexts[n] = absPath
 	}
 
-	return map[string]ParseComposeOptionsSuccessTestCase{
+	return map[string]SetComposeOptionsSuccessTestCase{
 		"single file specified case": {
 			[]string{"-f", "./compose.yml"},
 			[]string{"./compose.yml"},
@@ -49,8 +50,8 @@ func providerTestParseComposeOptionsSuccess(t *testing.T) map[string]ParseCompos
 	}
 }
 
-func TestParseComposeOptionsSuccess(t *testing.T) {
-	cases := providerTestParseComposeOptionsSuccess(t)
+func TestSetComposeOptionsSuccess(t *testing.T) {
+	cases := providerTestSetComposeOptionsSuccess(t)
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
@@ -58,18 +59,18 @@ func TestParseComposeOptionsSuccess(t *testing.T) {
 
 			os.Args = append([]string{"command"}, c.args...)
 			cmd := cobra.Command{}
-			opts := parseComposeOptions(cmd.Flags())
+			opts.setComposeOptions(cmd.PersistentFlags())
 			cmd.Execute()
 
-			if el, al := len(c.expected), len(opts.ConfigPaths); el != al {
+			if el, al := len(c.expected), len(opts.composeOpts.ConfigPaths); el != al {
 				t.Errorf(
 					"parsed config path counts do not match [expected = \"%s\", actual = \"%s\"]",
 					c.expected,
-					opts.ConfigPaths,
+					opts.composeOpts.ConfigPaths,
 				)
 			}
 			for i, ep := range c.expected {
-				ap := opts.ConfigPaths[i]
+				ap := opts.composeOpts.ConfigPaths[i]
 				if ep != ap {
 					t.Errorf(
 						"parsed path does not match [expected = \"%s\", actual = \"%s\"]",
@@ -81,6 +82,10 @@ func TestParseComposeOptionsSuccess(t *testing.T) {
 
 			// finally restore os.Args (global variable)
 			t.Cleanup(func() {
+				opts = rootCommandOptions{
+					composeOpts: compose.ProjectOptions{},
+					baseService: "",
+				}
 				os.Args = oldArgs
 			})
 		})
