@@ -25,15 +25,20 @@ func resolveArgs(args []string, baseService, runtimeService string, mounts map[s
 	r := resolver.PathResolver{Mounts: mounts}
 	res := make([]string, len(args))
 	for _, arg := range args {
-		if pathExists(arg) {
-			p, err := r.Resolve(arg, baseService, runtimeService)
-			if err != nil {
-				return nil, err
-			}
-			res = append(res, p)
-		} else {
+		if !pathExists(arg) {
 			res = append(res, arg)
+			continue
 		}
+
+		absPath, err := filepath.Abs(arg)
+		if err != nil {
+			return nil, err
+		}
+		p, err := r.Resolve(absPath, baseService, runtimeService)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, p)
 	}
 	return res, nil
 }
