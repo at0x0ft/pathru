@@ -13,13 +13,6 @@ const (
 	DEFAULT_BASE_SERVICE                        = "base_shell"
 )
 
-var (
-	opts = rootCommandOptions{
-		composeOpts: compose.ProjectOptions{},
-		baseService: "",
-	}
-)
-
 type rootCommandOptions struct {
 	composeOpts compose.ProjectOptions
 	baseService string
@@ -39,19 +32,23 @@ func (opts *rootCommandOptions) setBaseServiceOption(f *pflag.FlagSet) {
 }
 
 func NewRootCommand() *cobra.Command {
+	opts := rootCommandOptions{
+		composeOpts: compose.ProjectOptions{},
+		baseService: "",
+	}
 	cmd := &cobra.Command{
 		Use:   "pathru",
 		Short: "Command pass-through helper with path conversion",
 		Long: `pathru is a CLI command for help executing command in external container.
 Usage: pathru <runtime service name> <execute command> -- [command arguments & options]`,
-		RunE: runBody,
+		RunE: opts.runBody,
 	}
 	opts.setComposeOptions(cmd.PersistentFlags())
 	opts.setBaseServiceOption(cmd.PersistentFlags())
 	return cmd
 }
 
-func runBody(cmd *cobra.Command, args []string) error {
+func (opts *rootCommandOptions) runBody(cmd *cobra.Command, args []string) error {
 	runService, runArgs, err := parseRunService(args)
 	if err != nil {
 		return err

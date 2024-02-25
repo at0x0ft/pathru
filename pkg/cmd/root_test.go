@@ -58,6 +58,10 @@ func TestSetComposeOptionsSuccess(t *testing.T) {
 			oldArgs := os.Args
 
 			os.Args = append([]string{"command"}, c.args...)
+			opts := &rootCommandOptions{
+				composeOpts: compose.ProjectOptions{},
+				baseService: "",
+			}
 			cmd := cobra.Command{}
 			opts.setComposeOptions(cmd.PersistentFlags())
 			cmd.Execute()
@@ -82,10 +86,6 @@ func TestSetComposeOptionsSuccess(t *testing.T) {
 
 			// finally restore os.Args (global variable)
 			t.Cleanup(func() {
-				opts = rootCommandOptions{
-					composeOpts: compose.ProjectOptions{},
-					baseService: "",
-				}
 				os.Args = oldArgs
 			})
 		})
