@@ -11,40 +11,18 @@ import (
 	"path/filepath"
 )
 
-// TODO: delete constants
-const (
-	SrcMountPointEnv     = "CONTAINER_WORKSPACE_FOLDER"
-	HostMountPointEnv    = "LOCAL_WORKSPACE_FOLDER"
-	DevContainerDirname  = ".devcontainer"
-	BaseShellServiceName = "base_shell"
-)
-
-func Process(opts *docker_compose.ProjectOptions, args []string) error {
-	if len(args) < 2 {
-		return fmt.Errorf("[Error] Not enough arguments are given!")
-	}
-
-	// TODO: runtime service name validation
-	// 1. make sure 'CONTAINER_WORKSPACE_FOLDER' is set.
-	// note: should validate in later?
-	runtimeServiceName := args[0]
-	// executeCommand := args[1]
-	// args = args[2:]
-	args = args[1:]
-
-	var err error
-	var mounts map[string]mount.BindMount
-	mounts, err = (&compose.ComposeParser{}).Parse([]string{})
+func Process(opts *docker_compose.ProjectOptions, baseService string, runService string, args []string) error {
+	mounts, err := (&compose.ComposeParser{}).Parse([]string{})
 	if err != nil {
 		return err
 	}
 
-	args, err = resolveArgs(args, runtimeServiceName, mounts)
+	resolvedArgs, err := resolveArgs(args, baseService, runService, mounts)
 	if err != nil {
 		return err
 	}
 
-	output, exitCode := execDockerCompose(args)
+	output, exitCode := execDockerCompose(resolvedArgs)
 	if exitCode != 0 {
 		fmt.Println("[Error] docker-compose run failed.")
 		fmt.Println(output)
@@ -73,12 +51,12 @@ func pathExists(path string) bool {
 	return err == nil
 }
 
-func resolveArgs(args []string, runtimeServiceName string, mounts map[string]mount.BindMount) ([]string, error) {
+func resolveArgs(args []string, baseService, runtimeService string, mounts map[string]mount.BindMount) ([]string, error) {
 	r := resolver.PathResolver{Mounts: mounts}
 	res := make([]string, len(args))
 	for _, arg := range args {
 		if pathExists(arg) {
-			p, err := r.Resolve(arg, BaseShellServiceName, runtimeServiceName)
+			p, err := r.Resolve(arg, baseService, runtimeService)
 			if err != nil {
 				return nil, err
 			}
