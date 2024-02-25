@@ -1,4 +1,4 @@
-package argument
+package cmd
 
 import (
 	"github.com/spf13/cobra"
@@ -12,12 +12,12 @@ func TestMain(t *testing.M) {
 	os.Exit(code)
 }
 
-type ParseSuccessTestCase struct {
+type ParseComposeOptionsSuccessTestCase struct {
 	args     []string
 	expected []string
 }
 
-func providerTestParseSuccess(t *testing.T) map[string]ParseSuccessTestCase {
+func providerTestParseComposeOptionsSuccess(t *testing.T) map[string]ParseComposeOptionsSuccessTestCase {
 	fixturePaths := map[string]string{
 		"short_normal": "./test_data/compose.short.normal.yml",
 		"long_normal":  "./test_data/compose.long.normal.yml",
@@ -33,7 +33,7 @@ func providerTestParseSuccess(t *testing.T) map[string]ParseSuccessTestCase {
 		absContexts[n] = absPath
 	}
 
-	return map[string]ParseSuccessTestCase{
+	return map[string]ParseComposeOptionsSuccessTestCase{
 		"single file specified case": {
 			[]string{"-f", "./compose.yml"},
 			[]string{"./compose.yml"},
@@ -49,17 +49,16 @@ func providerTestParseSuccess(t *testing.T) map[string]ParseSuccessTestCase {
 	}
 }
 
-func TestParseSuccess(t *testing.T) {
-	cases := providerTestParseSuccess(t)
+func TestParseComposeOptionsSuccess(t *testing.T) {
+	cases := providerTestParseComposeOptionsSuccess(t)
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			oldArgs := os.Args
 
 			os.Args = append([]string{"command"}, c.args...)
-			p := ArgumentParser{}
 			cmd := cobra.Command{}
-			opts := p.addComposeProjectFlags(cmd.Flags())
+			opts := parseComposeOptions(cmd.Flags())
 			cmd.Execute()
 
 			if el, al := len(c.expected), len(opts.ConfigPaths); el != al {
