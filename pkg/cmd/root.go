@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/at0x0ft/pathru/pkg/pathru"
+	"github.com/at0x0ft/pathru/pkg/mount"
 	"github.com/docker/compose/v2/cmd/compose"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -14,9 +15,15 @@ const (
 	DEFAULT_BASE_SERVICE                        = "base_shell"
 )
 
+type rootCommandBaseServiceOptions struct {
+	name string
+	rawWorkDir string
+	workDirMount mount.BindMount
+}
+
 type rootCommandOptions struct {
 	composeOpts compose.ProjectOptions
-	baseService string
+	baseServiceOpts rootCommandBaseServiceOptions
 }
 
 // ref: https://github.com/docker/compose/blob/d10a179f3e451f8b03fd99271f011c34bc31bedb/cmd/compose/compose.go#L157-L167
@@ -28,14 +35,15 @@ func (opts *rootCommandOptions) setComposeOptions(f *pflag.FlagSet) {
 	f.StringVar(&opts.composeOpts.ProjectDir, "project-directory", "", "Specify an alternate working directory\n(default: the path of the, first specified, Compose file)")
 }
 
-func (opts *rootCommandOptions) setBaseServiceOption(f *pflag.FlagSet) {
-	f.StringVarP(&opts.baseService, "base-service", "b", DEFAULT_BASE_SERVICE, "base current service name")
+func (opts *rootCommandOptions) setBaseServiceOptions(f *pflag.FlagSet) {
+	f.StringVarP(&(opts.baseServiceOpts.name), "base-service", "b", DEFAULT_BASE_SERVICE, "base current service name")
+	f.StringVarP(&(opts.baseServiceOpts.rawWorkDir), "working-dir", "w", "", "working directory mount setting for base current service")
 }
 
 func NewRootCommand() *cobra.Command {
 	opts := rootCommandOptions{
 		composeOpts: compose.ProjectOptions{},
-		baseService: "",
+		baseServiceOpts: rootCommandBaseServiceOptions{},
 	}
 	cmd := &cobra.Command{
 		Use:   "pathru",
@@ -45,16 +53,20 @@ Usage: pathru <runtime service name> <execute command> -- [command arguments & o
 		RunE: opts.runBody,
 	}
 	opts.setComposeOptions(cmd.PersistentFlags())
-	opts.setBaseServiceOption(cmd.PersistentFlags())
+	opts.setBaseServiceOptions(cmd.PersistentFlags())
 	return cmd
 }
 
 func (opts *rootCommandOptions) runBody(cmd *cobra.Command, args []string) error {
+	if err := opts.baseServiceOpts.parseOptions(); err != nil {
+		return err
+	}
+
 	runService, runArgs, err := parseRunService(args)
 	if err != nil {
 		return err
 	}
-	convertedArgs, err := pathru.Process(&(opts.composeOpts), opts.baseService, runService, runArgs)
+	convertedArgs, err := pathru.Process(&(opts.composeOpts), opts.baseServiceOpts.name, runService, runArgs)
 	if err != nil {
 		return err
 	}
@@ -68,4 +80,17 @@ func parseRunService(args []string) (string, []string, error) {
 		return "", nil, fmt.Errorf("not enough argument(s) are given")
 	}
 	return args[0], args[1:], nil
+}
+
+func (bopts *rootCommandBaseServiceOptions) parseOptions() error {
+	paths:= strings.Split(bopts.rawWorkDir, ":")
+	if actual := len(paths); actual != 2 {
+		return fmt.Errorf(
+			"just 2 paths must be specified for working-dir option [actual count = \"%v\"]",
+			actual,
+		)
+	}
+
+	bopts.workDirMount = mount.BindMount{Source:paths[0], Target:paths[1]}
+	return nil
 }

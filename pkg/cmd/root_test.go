@@ -1,10 +1,10 @@
 package cmd
 
 import (
+	"github.com/at0x0ft/pathru/pkg/mount"
 	"github.com/docker/compose/v2/cmd/compose"
 	"github.com/spf13/cobra"
 	"os"
-	"path/filepath"
 	"testing"
 )
 
@@ -19,21 +19,6 @@ type SetComposeOptionsSuccessTestCase struct {
 }
 
 func providerTestSetComposeOptionsSuccess(t *testing.T) map[string]SetComposeOptionsSuccessTestCase {
-	fixturePaths := map[string]string{
-		"short_normal": "./test_data/compose.short.normal.yml",
-		"long_normal":  "./test_data/compose.long.normal.yml",
-		"no_bind":      "./test_data/compose.no.bind.yml",
-	}
-	absContexts := make(map[string]string)
-	for n, path := range fixturePaths {
-		absPath, err := filepath.Abs(filepath.Dir(path))
-		if err != nil {
-			t.Errorf("%v", err.Error())
-			return nil
-		}
-		absContexts[n] = absPath
-	}
-
 	return map[string]SetComposeOptionsSuccessTestCase{
 		"single file specified case": {
 			[]string{"-f", "./compose.yml"},
@@ -61,7 +46,7 @@ func TestSetComposeOptionsSuccess(t *testing.T) {
 			os.Args = append([]string{"command"}, c.args...)
 			opts := &rootCommandOptions{
 				composeOpts: compose.ProjectOptions{},
-				baseService: "",
+				baseServiceOpts: rootCommandBaseServiceOptions{},
 			}
 			cmd := cobra.Command{}
 			opts.setComposeOptions(cmd.PersistentFlags())
@@ -88,6 +73,89 @@ func TestSetComposeOptionsSuccess(t *testing.T) {
 						ap,
 					)
 				}
+			}
+
+			// finally restore os.Args (global variable)
+			t.Cleanup(func() {
+				os.Args = oldArgs
+			})
+		})
+	}
+}
+
+type BaseServiceOptionsSuccessTestCaseExpectedValues struct{
+	name string
+	workDirMount mount.BindMount
+}
+type BaseServiceOptionsSuccessTestCase struct {
+	args     []string
+	expected BaseServiceOptionsSuccessTestCaseExpectedValues
+}
+
+func providerTestBaseServiceOptionsSuccess(t *testing.T) map[string]BaseServiceOptionsSuccessTestCase {
+	return map[string]BaseServiceOptionsSuccessTestCase{
+		"simple case": {
+			[]string{"-w", "/home/testuser/Programming:/workspace"},
+			BaseServiceOptionsSuccessTestCaseExpectedValues{
+				name: "base_shell",
+				workDirMount: mount.BindMount{
+					"/home/testuser/Programming",
+					"/workspace",
+				},
+			},
+		},
+		"base service specified case": {
+			[]string{"-w", "/tmp:/workspace/src", "-b", "base"},
+			BaseServiceOptionsSuccessTestCaseExpectedValues{
+				name: "base",
+				workDirMount: mount.BindMount{
+					"/tmp",
+					"/workspace/src",
+				},
+			},
+		},
+	}
+}
+
+func TestBaseServiceOptionsSuccess(t *testing.T) {
+	cases := providerTestBaseServiceOptionsSuccess(t)
+	for name, c := range cases {
+		t.Run(name, func(t *testing.T) {
+			// no parallelization because using os.Args (global variable)
+			// t.Parallel()
+			oldArgs := os.Args
+
+			os.Args = append([]string{"command"}, c.args...)
+			opts := &rootCommandOptions{
+				composeOpts: compose.ProjectOptions{},
+				baseServiceOpts: rootCommandBaseServiceOptions{},
+			}
+			cmd := cobra.Command{}
+			opts.setBaseServiceOptions(cmd.PersistentFlags())
+			if err := cmd.Execute(); err != nil {
+				t.Errorf(
+					"command execute error: %v",
+					err.Error(),
+				)
+			}
+			actual := &(opts.baseServiceOpts)
+			if err := actual.parseOptions(); err != nil {
+				t.Errorf("%v", err)
+			}
+
+			if c.expected.name != actual.name {
+				t.Errorf(
+					"parsed base service names do not match [expected = \"%s\", actual = \"%s\"]",
+					c.expected.name,
+					actual.name,
+				)
+			}
+			if c.expected.workDirMount != actual.workDirMount {
+				t.Errorf(
+					"parsed base service working directory mounts do not match [expected = \"%s\", actual = \"%s\"]",
+					c.expected.workDirMount,
+					actual.workDirMount,
+				)
 			}
 
 			// finally restore os.Args (global variable)
