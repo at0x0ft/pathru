@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"github.com/at0x0ft/pathru/pkg/mount"
-	"github.com/docker/compose/v2/cmd/compose"
 	"github.com/spf13/cobra"
 	"os"
 	"testing"
@@ -45,11 +44,11 @@ func TestSetComposeOptionsSuccess(t *testing.T) {
 
 			os.Args = append([]string{"command"}, c.args...)
 			opts := &rootCommandOptions{
-				composeOpts:     compose.ProjectOptions{},
+				composeOpts:     composeOptions{},
 				baseServiceOpts: rootCommandBaseServiceOptions{},
 			}
 			cmd := cobra.Command{}
-			opts.setComposeOptions(cmd.PersistentFlags())
+			opts.composeOpts.set(cmd.PersistentFlags())
 			if err := cmd.Execute(); err != nil {
 				t.Errorf(
 					"command execute error: %v",
@@ -127,11 +126,11 @@ func TestBaseServiceOptionsSuccess(t *testing.T) {
 
 			os.Args = append([]string{"command"}, c.args...)
 			opts := &rootCommandOptions{
-				composeOpts:     compose.ProjectOptions{},
+				composeOpts:     composeOptions{},
 				baseServiceOpts: rootCommandBaseServiceOptions{},
 			}
 			cmd := cobra.Command{}
-			opts.setBaseServiceOptions(cmd.PersistentFlags())
+			opts.baseServiceOpts.set(cmd.PersistentFlags())
 			if err := cmd.Execute(); err != nil {
 				t.Errorf(
 					"command execute error: %v",
