@@ -1,20 +1,13 @@
-package compose
+package mount
 
 import (
-	"github.com/at0x0ft/pathru/pkg/mount"
-	"os"
 	"path/filepath"
 	"testing"
 )
 
-func TestMain(t *testing.M) {
-	code := t.Run()
-	os.Exit(code)
-}
-
 type ParseSuccessTestCase struct {
 	configPaths []string
-	expected    map[string]mount.BindMount
+	expected    map[string]BindMount
 }
 
 func providerTestParseSuccess(t *testing.T) map[string]ParseSuccessTestCase {
@@ -36,8 +29,8 @@ func providerTestParseSuccess(t *testing.T) map[string]ParseSuccessTestCase {
 	return map[string]ParseSuccessTestCase{
 		"short syntax normal case": {
 			[]string{fixturePaths["short_normal"]},
-			map[string]mount.BindMount{
-				"base_shell": mount.BindMount{
+			map[string]BindMount{
+				"base_shell": BindMount{
 					Source: filepath.Join(absContexts["short_normal"], "./src"),
 					Target: "/workspace",
 				},
@@ -45,12 +38,12 @@ func providerTestParseSuccess(t *testing.T) map[string]ParseSuccessTestCase {
 		},
 		"long syntax normal case": {
 			[]string{fixturePaths["long_normal"]},
-			map[string]mount.BindMount{
-				"base_shell": mount.BindMount{
+			map[string]BindMount{
+				"base_shell": BindMount{
 					Source: filepath.Join(absContexts["long_normal"], "."),
 					Target: "/workspace",
 				},
-				"golang": mount.BindMount{
+				"golang": BindMount{
 					Source: "/home/testuser/Programming/test_project/golang",
 					Target: "/go/src",
 				},
@@ -58,12 +51,12 @@ func providerTestParseSuccess(t *testing.T) map[string]ParseSuccessTestCase {
 		},
 		"short syntax not found bind case": {
 			[]string{fixturePaths["no_bind"]},
-			map[string]mount.BindMount{},
+			map[string]BindMount{},
 		},
 		"override case": {
 			[]string{fixturePaths["long_normal"], fixturePaths["short_normal"], fixturePaths["no_bind"]},
-			map[string]mount.BindMount{
-				"golang": mount.BindMount{
+			map[string]BindMount{
+				"golang": BindMount{
 					Source: "/home/testuser/Programming/test_project/golang",
 					Target: "/go/src",
 				},
@@ -77,7 +70,7 @@ func TestParseSuccess(t *testing.T) {
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			p := ComposeParser{}
+			p := MountParser{}
 			actual, err := p.Parse(c.configPaths)
 			if err != nil {
 				t.Error(err)

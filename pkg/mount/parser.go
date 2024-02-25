@@ -1,14 +1,13 @@
-package compose
+package mount
 
 import (
-	"github.com/at0x0ft/pathru/pkg/mount"
 	"github.com/compose-spec/compose-go/v2/cli"
 	"github.com/compose-spec/compose-go/v2/types"
 )
 
-type ComposeParser struct{}
+type MountParser struct{}
 
-func (mp *ComposeParser) Parse(configPaths []string) (map[string]mount.BindMount, error) {
+func (mp *MountParser) Parse(configPaths []string) (map[string]BindMount, error) {
 	opts, err := cli.NewProjectOptions(
 		configPaths,
 		cli.WithOsEnv,
@@ -25,7 +24,7 @@ func (mp *ComposeParser) Parse(configPaths []string) (map[string]mount.BindMount
 		return nil, err
 	}
 
-	res := make(map[string]mount.BindMount)
+	res := make(map[string]BindMount)
 	for _, n := range prj.ServiceNames() {
 		s, err := prj.GetService(n)
 		if err != nil {
@@ -35,7 +34,7 @@ func (mp *ComposeParser) Parse(configPaths []string) (map[string]mount.BindMount
 			if v.Type != types.VolumeTypeBind {
 				continue
 			}
-			res[n] = mount.BindMount{Source: v.Source, Target: v.Target}
+			res[n] = BindMount{Source: v.Source, Target: v.Target}
 		}
 	}
 	return res, nil

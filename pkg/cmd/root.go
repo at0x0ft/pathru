@@ -10,7 +10,7 @@ import (
 
 const (
 	COMPOSE_PROJECT_OPTIONS_DEFAULT_CONFIG_PATH = "./docker-compose.yml"
-	DEFAULT_BASE_SERVICE = "base_shell"
+	DEFAULT_BASE_SERVICE                        = "base_shell"
 )
 
 func NewRootCommand() *cobra.Command {
