@@ -11,7 +11,7 @@ import (
 )
 
 func Process(opts *compose.ProjectOptions, baseService string, runService string, args []string) error {
-	mounts, err := (&mount.MountParser{}).Parse([]string{})
+	mounts, err := (&mount.MountParser{}).Parse(opts)
 	if err != nil {
 		return err
 	}

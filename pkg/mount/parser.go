@@ -3,23 +3,18 @@ package mount
 import (
 	"github.com/compose-spec/compose-go/v2/cli"
 	"github.com/compose-spec/compose-go/v2/types"
+	"github.com/docker/compose/v2/cmd/compose"
 )
 
 type MountParser struct{}
 
-func (mp *MountParser) Parse(configPaths []string) (map[string]BindMount, error) {
-	opts, err := cli.NewProjectOptions(
-		configPaths,
-		cli.WithOsEnv,
-		cli.WithDotEnv,
-		cli.WithConfigFileEnv,
-		cli.WithDefaultConfigPath,
-	)
+func (mp *MountParser) Parse(opts *compose.ProjectOptions) (map[string]BindMount, error) {
+	convertedOpts, err := mp.convertComposeProjectOptions(opts)
 	if err != nil {
 		return nil, err
 	}
 
-	prj, err := cli.ProjectFromOptions(opts)
+	prj, err := cli.ProjectFromOptions(convertedOpts)
 	if err != nil {
 		return nil, err
 	}
@@ -38,4 +33,19 @@ func (mp *MountParser) Parse(configPaths []string) (map[string]BindMount, error)
 		}
 	}
 	return res, nil
+}
+
+// ref: https://github.com/docker/compose/blob/a7224411b4fb179ca47c2d4d86fb3a50a185c5ac/cmd/compose/compose.go#L288-L299
+func (mp *MountParser) convertComposeProjectOptions(opts *compose.ProjectOptions) (*cli.ProjectOptions, error) {
+	return cli.NewProjectOptions(
+		opts.ConfigPaths,
+		cli.WithWorkingDirectory(opts.ProjectDir),
+		cli.WithOsEnv,
+		cli.WithConfigFileEnv,
+		cli.WithDefaultConfigPath,
+		cli.WithEnvFiles(opts.EnvFiles...),
+		cli.WithDotEnv,
+		cli.WithDefaultProfiles(opts.Profiles...),
+		cli.WithName(opts.ProjectName),
+	)
 }

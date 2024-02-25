@@ -1,6 +1,7 @@
 package mount
 
 import (
+	"github.com/docker/compose/v2/cmd/compose"
 	"path/filepath"
 	"testing"
 )
@@ -71,7 +72,8 @@ func TestParseSuccess(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			p := MountParser{}
-			actual, err := p.Parse(c.configPaths)
+			opts := &compose.ProjectOptions{ConfigPaths: c.configPaths}
+			actual, err := p.Parse(opts)
 			if err != nil {
 				t.Error(err)
 			}
