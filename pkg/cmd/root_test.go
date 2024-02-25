@@ -64,7 +64,12 @@ func TestSetComposeOptionsSuccess(t *testing.T) {
 			}
 			cmd := cobra.Command{}
 			opts.setComposeOptions(cmd.PersistentFlags())
-			cmd.Execute()
+			if err := cmd.Execute(); err != nil {
+				t.Errorf(
+					"command execute error: %v",
+					err.Error(),
+				)
+			}
 
 			if el, al := len(c.expected), len(opts.composeOpts.ConfigPaths); el != al {
 				t.Errorf(
