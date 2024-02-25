@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"github.com/at0x0ft/pathru/pkg/mount"
 	"github.com/spf13/cobra"
 	"os"
 	"testing"
@@ -44,8 +43,8 @@ func TestSetComposeOptionsSuccess(t *testing.T) {
 
 			os.Args = append([]string{"command"}, c.args...)
 			opts := &rootCommandOptions{
-				composeOpts:     composeOptions{},
-				baseServiceOpts: rootCommandBaseServiceOptions{},
+				composeOpts: composeOptions{},
+				baseService: "",
 			}
 			cmd := cobra.Command{}
 			opts.composeOpts.set(cmd.PersistentFlags())
@@ -82,36 +81,20 @@ func TestSetComposeOptionsSuccess(t *testing.T) {
 	}
 }
 
-type BaseServiceOptionsSuccessTestCaseExpectedValues struct {
-	name         string
-	workDirMount mount.BindMount
-}
 type BaseServiceOptionsSuccessTestCase struct {
 	args     []string
-	expected BaseServiceOptionsSuccessTestCaseExpectedValues
+	expected string
 }
 
 func providerTestBaseServiceOptionsSuccess(t *testing.T) map[string]BaseServiceOptionsSuccessTestCase {
 	return map[string]BaseServiceOptionsSuccessTestCase{
-		"simple case": {
-			[]string{"-w", "/home/testuser/Programming:/workspace"},
-			BaseServiceOptionsSuccessTestCaseExpectedValues{
-				name: "base_shell",
-				workDirMount: mount.BindMount{
-					Source: "/home/testuser/Programming",
-					Target: "/workspace",
-				},
-			},
-		},
 		"base service specified case": {
-			[]string{"-w", "/tmp:/workspace/src", "-b", "base"},
-			BaseServiceOptionsSuccessTestCaseExpectedValues{
-				name: "base",
-				workDirMount: mount.BindMount{
-					Source: "/tmp",
-					Target: "/workspace/src",
-				},
-			},
+			[]string{"-b", "base"},
+			"base",
+		},
+		"no specified case": {
+			[]string{},
+			"base_shell",
 		},
 	}
 }
@@ -126,34 +109,23 @@ func TestBaseServiceOptionsSuccess(t *testing.T) {
 
 			os.Args = append([]string{"command"}, c.args...)
 			opts := &rootCommandOptions{
-				composeOpts:     composeOptions{},
-				baseServiceOpts: rootCommandBaseServiceOptions{},
+				composeOpts: composeOptions{},
+				baseService: "",
 			}
 			cmd := cobra.Command{}
-			opts.baseServiceOpts.set(cmd.PersistentFlags())
+			opts.setBaseServiceOption(cmd.PersistentFlags())
 			if err := cmd.Execute(); err != nil {
 				t.Errorf(
 					"command execute error: %v",
 					err.Error(),
 				)
 			}
-			actual := &(opts.baseServiceOpts)
-			if err := actual.parseOptions(); err != nil {
-				t.Errorf("%v", err)
-			}
 
-			if c.expected.name != actual.name {
+			if c.expected != opts.baseService {
 				t.Errorf(
-					"parsed base service names do not match [expected = \"%s\", actual = \"%s\"]",
-					c.expected.name,
-					actual.name,
-				)
-			}
-			if c.expected.workDirMount != actual.workDirMount {
-				t.Errorf(
-					"parsed base service working directory mounts do not match [expected = \"%s\", actual = \"%s\"]",
-					c.expected.workDirMount,
-					actual.workDirMount,
+					"parsed base service do not match [expected = \"%s\", actual = \"%s\"]",
+					c.expected,
+					opts.baseService,
 				)
 			}
 
