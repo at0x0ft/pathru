@@ -11,15 +11,35 @@ func TestMain(t *testing.M) {
 	os.Exit(code)
 }
 
-func getMounts() map[string]mount.BindMount {
-	return map[string]mount.BindMount{
-		"base_shell": mount.BindMount{
-			Source: "/home/testuser/Programming/test_project",
-			Target: "/workspace",
+func getMounts() map[string][]mount.BindMount {
+	return map[string][]mount.BindMount{
+		"base_shell": []mount.BindMount{
+			mount.BindMount{
+				Source: "/etc/passwd",
+				Target: "/etc/passwd",
+			},
+			mount.BindMount{
+				Source: "/etc/group",
+				Target: "/etc/group",
+			},
+			mount.BindMount{
+				Source: "/home/testuser/Programming/test_project",
+				Target: "/workspace",
+			},
 		},
-		"golang": mount.BindMount{
-			Source: "/home/testuser/Programming/test_project/golang",
-			Target: "/go/src",
+		"golang": []mount.BindMount{
+			mount.BindMount{
+				Source: "/etc/passwd",
+				Target: "/etc/passwd",
+			},
+			mount.BindMount{
+				Source: "/etc/group",
+				Target: "/etc/group",
+			},
+			mount.BindMount{
+				Source: "/home/testuser/Programming/test_project/golang",
+				Target: "/go/src",
+			},
 		},
 	}
 }
@@ -68,7 +88,7 @@ func TestResolveSuccess(t *testing.T) {
 			pr := PathResolver{getMounts()}
 			actual, err := pr.Resolve(c.path, c.baseService, c.dstService)
 			if err != nil {
-				t.Error(err)
+				t.Errorf("%v", err)
 			}
 
 			if c.expected != actual {

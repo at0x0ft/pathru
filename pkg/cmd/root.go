@@ -6,6 +6,7 @@ import (
 	"github.com/docker/compose/v2/cmd/compose"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+	"strings"
 )
 
 const (
@@ -53,12 +54,18 @@ func (opts *rootCommandOptions) runBody(cmd *cobra.Command, args []string) error
 	if err != nil {
 		return err
 	}
-	return pathru.Process(&opts.composeOpts, opts.baseService, runService, runArgs)
+	convertedArgs, err := pathru.Process(&(opts.composeOpts), opts.baseService, runService, runArgs)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%v\n", strings.Join(convertedArgs, " "))
+	return nil
 }
 
 func parseRunService(args []string) (string, []string, error) {
 	if len(args) < 1 {
-		return "", nil, fmt.Errorf("[Error] not enough argument(s) are given")
+		return "", nil, fmt.Errorf("not enough argument(s) are given")
 	}
 	return args[0], args[1:], nil
 }

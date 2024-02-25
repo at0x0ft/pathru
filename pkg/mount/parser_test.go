@@ -2,13 +2,14 @@ package mount
 
 import (
 	"github.com/docker/compose/v2/cmd/compose"
+	"github.com/google/go-cmp/cmp"
 	"path/filepath"
 	"testing"
 )
 
 type ParseSuccessTestCase struct {
 	configPaths []string
-	expected    map[string]BindMount
+	expected    map[string][]BindMount
 }
 
 func providerTestParseSuccess(t *testing.T) map[string]ParseSuccessTestCase {
@@ -30,36 +31,44 @@ func providerTestParseSuccess(t *testing.T) map[string]ParseSuccessTestCase {
 	return map[string]ParseSuccessTestCase{
 		"short syntax normal case": {
 			[]string{fixturePaths["short_normal"]},
-			map[string]BindMount{
-				"base_shell": BindMount{
-					Source: filepath.Join(absContexts["short_normal"], "./src"),
-					Target: "/workspace",
+			map[string][]BindMount{
+				"base_shell": []BindMount{
+					BindMount{
+						Source: filepath.Join(absContexts["short_normal"], "./src"),
+						Target: "/workspace",
+					},
 				},
 			},
 		},
 		"long syntax normal case": {
 			[]string{fixturePaths["long_normal"]},
-			map[string]BindMount{
-				"base_shell": BindMount{
-					Source: filepath.Join(absContexts["long_normal"], "."),
-					Target: "/workspace",
+			map[string][]BindMount{
+				"base_shell": []BindMount{
+					BindMount{
+						Source: filepath.Join(absContexts["long_normal"], "."),
+						Target: "/workspace",
+					},
 				},
-				"golang": BindMount{
-					Source: "/home/testuser/Programming/test_project/golang",
-					Target: "/go/src",
+				"golang": []BindMount{
+					BindMount{
+						Source: "/home/testuser/Programming/test_project/golang",
+						Target: "/go/src",
+					},
 				},
 			},
 		},
 		"short syntax not found bind case": {
 			[]string{fixturePaths["no_bind"]},
-			map[string]BindMount{},
+			map[string][]BindMount{},
 		},
 		"override case": {
 			[]string{fixturePaths["long_normal"], fixturePaths["short_normal"], fixturePaths["no_bind"]},
-			map[string]BindMount{
-				"golang": BindMount{
-					Source: "/home/testuser/Programming/test_project/golang",
-					Target: "/go/src",
+			map[string][]BindMount{
+				"golang": []BindMount{
+					BindMount{
+						Source: "/home/testuser/Programming/test_project/golang",
+						Target: "/go/src",
+					},
 				},
 			},
 		},
@@ -85,18 +94,21 @@ func TestParseSuccess(t *testing.T) {
 					actual,
 				)
 			}
-			for k, em := range c.expected {
-				if am, ok := actual[k]; !ok {
+			for s, ems := range c.expected {
+				ams, ok := actual[s]
+				if !ok {
 					t.Errorf(
-						"parsed mounts do not have expected service [\"%s\"]",
-						k,
+						"actual does not have expected service [\"%s\"]",
+						s,
 					)
-				} else if em != am {
+				}
+
+				if !cmp.Equal(ems, ams) {
 					t.Errorf(
 						"parsed mounts do not match [service = \"%s\", expected = \"%s\", actual = \"%s\"]",
-						k,
-						em,
-						am,
+						s,
+						ems,
+						ams,
 					)
 				}
 			}
