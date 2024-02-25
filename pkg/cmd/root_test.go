@@ -54,7 +54,8 @@ func TestSetComposeOptionsSuccess(t *testing.T) {
 	cases := providerTestSetComposeOptionsSuccess(t)
 	for name, c := range cases {
 		t.Run(name, func(t *testing.T) {
-			t.Parallel()
+			// no parallelization because using os.Args (global variable)
+			// t.Parallel()
 			oldArgs := os.Args
 
 			os.Args = append([]string{"command"}, c.args...)
