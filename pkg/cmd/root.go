@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/at0x0ft/pathru/pkg/pathru"
 	"github.com/at0x0ft/pathru/pkg/mount"
+	"github.com/at0x0ft/pathru/pkg/pathru"
 	"github.com/docker/compose/v2/cmd/compose"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -16,13 +16,13 @@ const (
 )
 
 type rootCommandBaseServiceOptions struct {
-	name string
-	rawWorkDir string
+	name         string
+	rawWorkDir   string
 	workDirMount mount.BindMount
 }
 
 type rootCommandOptions struct {
-	composeOpts compose.ProjectOptions
+	composeOpts     compose.ProjectOptions
 	baseServiceOpts rootCommandBaseServiceOptions
 }
 
@@ -42,7 +42,7 @@ func (opts *rootCommandOptions) setBaseServiceOptions(f *pflag.FlagSet) {
 
 func NewRootCommand() *cobra.Command {
 	opts := rootCommandOptions{
-		composeOpts: compose.ProjectOptions{},
+		composeOpts:     compose.ProjectOptions{},
 		baseServiceOpts: rootCommandBaseServiceOptions{},
 	}
 	cmd := &cobra.Command{
@@ -83,7 +83,7 @@ func parseRunService(args []string) (string, []string, error) {
 }
 
 func (bopts *rootCommandBaseServiceOptions) parseOptions() error {
-	paths:= strings.Split(bopts.rawWorkDir, ":")
+	paths := strings.Split(bopts.rawWorkDir, ":")
 	if actual := len(paths); actual != 2 {
 		return fmt.Errorf(
 			"just 2 paths must be specified for working-dir option [actual count = \"%v\"]",
@@ -91,6 +91,6 @@ func (bopts *rootCommandBaseServiceOptions) parseOptions() error {
 		)
 	}
 
-	bopts.workDirMount = mount.BindMount{Source:paths[0], Target:paths[1]}
+	bopts.workDirMount = mount.BindMount{Source: paths[0], Target: paths[1]}
 	return nil
 }

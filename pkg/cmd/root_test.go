@@ -45,7 +45,7 @@ func TestSetComposeOptionsSuccess(t *testing.T) {
 
 			os.Args = append([]string{"command"}, c.args...)
 			opts := &rootCommandOptions{
-				composeOpts: compose.ProjectOptions{},
+				composeOpts:     compose.ProjectOptions{},
 				baseServiceOpts: rootCommandBaseServiceOptions{},
 			}
 			cmd := cobra.Command{}
@@ -83,8 +83,8 @@ func TestSetComposeOptionsSuccess(t *testing.T) {
 	}
 }
 
-type BaseServiceOptionsSuccessTestCaseExpectedValues struct{
-	name string
+type BaseServiceOptionsSuccessTestCaseExpectedValues struct {
+	name         string
 	workDirMount mount.BindMount
 }
 type BaseServiceOptionsSuccessTestCase struct {
@@ -99,8 +99,8 @@ func providerTestBaseServiceOptionsSuccess(t *testing.T) map[string]BaseServiceO
 			BaseServiceOptionsSuccessTestCaseExpectedValues{
 				name: "base_shell",
 				workDirMount: mount.BindMount{
-					"/home/testuser/Programming",
-					"/workspace",
+					Source: "/home/testuser/Programming",
+					Target: "/workspace",
 				},
 			},
 		},
@@ -109,8 +109,8 @@ func providerTestBaseServiceOptionsSuccess(t *testing.T) map[string]BaseServiceO
 			BaseServiceOptionsSuccessTestCaseExpectedValues{
 				name: "base",
 				workDirMount: mount.BindMount{
-					"/tmp",
-					"/workspace/src",
+					Source: "/tmp",
+					Target: "/workspace/src",
 				},
 			},
 		},
@@ -127,7 +127,7 @@ func TestBaseServiceOptionsSuccess(t *testing.T) {
 
 			os.Args = append([]string{"command"}, c.args...)
 			opts := &rootCommandOptions{
-				composeOpts: compose.ProjectOptions{},
+				composeOpts:     compose.ProjectOptions{},
 				baseServiceOpts: rootCommandBaseServiceOptions{},
 			}
 			cmd := cobra.Command{}
