@@ -6,6 +6,8 @@ import (
 	"github.com/docker/compose/v2/cmd/compose"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
+	"path/filepath"
 	"strings"
 )
 
@@ -18,8 +20,39 @@ const (
 type composeOptions compose.ProjectOptions
 
 type rootCommandOptions struct {
+	devcontainerOpts devcontainerOptions
 	composeOpts composeOptions
 	baseService string
+}
+
+type devcontainerOptions struct {
+	path string
+	dockerComposeFile []string
+	service string
+}
+
+func (opts *devcontainerOptions) set(f *pflag.FlagSet) {
+	f.StringVarP(&opts.path, "config-path", "c", "", "path to devcontainer.json")
+}
+
+func (opts *devcontainerOptions) parse() (*devcontainerOptions, error) {
+	if opts.path == "" {
+		return nil, nil
+	}
+
+	dirName := filepath.Dir(opts.path)
+	baseName, ext := splitExt(filepath.Base(opts.path))
+	viper.SetConfigName(baseName)
+	viper.SetConfigType(ext)
+	viper.AddConfigPath(dirName)
+	if err := viper.ReadInConfig(); err != nil {
+		return nil, err
+	}
+
+	newOpts := *opts
+	newOpts.dockerComposeFile = viper.GetStringSlice("dockerComposeFile")
+	newOpts.service = viper.GetString("service")
+	return &newOpts, nil
 }
 
 // ref: https://github.com/docker/compose/blob/d10a179f3e451f8b03fd99271f011c34bc31bedb/cmd/compose/compose.go#L157-L167
@@ -78,4 +111,10 @@ func (opts *rootCommandOptions) parseRunService(args []string) (string, []string
 		return "", nil, fmt.Errorf("not enough argument(s) are given")
 	}
 	return args[0], args[1:], nil
+}
+
+func splitExt(filename string) (string, string) {
+	extWithDot := filepath.Ext(filename)
+	ext := extWithDot[min(1, len(extWithDot)):]
+	return filename[:len(filename) - len(extWithDot)], ext
 }

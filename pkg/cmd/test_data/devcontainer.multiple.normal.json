@@ -1,0 +1,35 @@
+{
+  "name": "pathru VSCode devcontainer.",
+  "dockerComposeFile": [
+      "../src/docker-compose.yml",
+      "./compose.yaml"
+  ],
+  "service": "shell",
+  "workspaceFolder": "/workspace",
+  "remoteEnv": {
+      "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}",
+      "CONTAINER_WORKSPACE_FOLDER": "${containerWorkspaceFolder}",
+      "PATH": "${containerWorkspaceFolder}/.devcontainer/bin/user:${containerEnv:PATH}",
+      "HISTFILE": "${containerWorkspaceFolder}/.devcontainer/.zhistory"
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+          "terminal.integrated.cwd": "${containerWorkspaceFolder}/./pathru",
+          "git-graph.maxDepthOfRepoSearch": 1
+      },
+      "extensions": [
+          "ms-azuretools.vscode-docker",
+          "wmaurer.vscode-jumpy",
+          "oderwat.indent-rainbow",
+          "mosapride.zenkaku",
+          "christian-kohler.path-intellisense",
+          "streetsidesoftware.code-spell-checker",
+          "eamodio.gitlens",
+          "mhutchie.git-graph",
+          "yzhang.markdown-all-in-one"
+      ]
+    }
+  },
+  "remoteUser": "vscode"
+}
