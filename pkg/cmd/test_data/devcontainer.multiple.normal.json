@@ -1,0 +1,12 @@
+{
+  "name": "pathru VSCode devcontainer.",
+  "dockerComposeFile": [
+      "../src/docker-compose.yml",
+      "./compose.yaml"
+  ],
+  "service": "shell",
+  "workspaceFolder": "/workspace",
+  "remoteEnv": {
+      "PROJECT_DIR": "${localWorkspaceFolder}"
+  }
+}

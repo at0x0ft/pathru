@@ -9,73 +9,125 @@ import (
 	"strings"
 )
 
-const (
-	COMPOSE_PROJECT_OPTIONS_DEFAULT_CONFIG_PATH = "./docker-compose.yml"
-	COMPOSE_PROJECT_OPTIONS_DEFAULT_PROJECT_DIR = ""
-	DEFAULT_BASE_SERVICE                        = "base_shell"
-)
-
-type composeOptions compose.ProjectOptions
-
 type rootCommandOptions struct {
-	composeOpts composeOptions
+	composeOptions
 	baseService string
 }
 
-// ref: https://github.com/docker/compose/blob/d10a179f3e451f8b03fd99271f011c34bc31bedb/cmd/compose/compose.go#L157-L167
-func (opts *composeOptions) set(f *pflag.FlagSet) {
-	f.StringArrayVar(&opts.Profiles, "profile", []string{}, "Specify a profile to enable")
-	f.StringVarP(&opts.ProjectName, "project-name", "p", "", "Project name")
-	f.StringArrayVarP(&opts.ConfigPaths, "file", "f", []string{COMPOSE_PROJECT_OPTIONS_DEFAULT_CONFIG_PATH}, "Compose configuration files")
-	f.StringArrayVar(&opts.EnvFiles, "env-file", nil, "Specify an alternate environment file")
-	f.StringVar(&opts.ProjectDir, "project-directory", COMPOSE_PROJECT_OPTIONS_DEFAULT_PROJECT_DIR, "Specify an alternate working directory\n(default: the path of the, first specified, Compose file)")
+var defaultRootCommandOptions = rootCommandOptions{
+	composeOptions: defaultComposeOptions,
+	baseService:    "base_shell",
+}
+
+func createNewRootCommandOptions() *rootCommandOptions {
+	res := defaultRootCommandOptions
+	return &res
 }
 
 func (opts *rootCommandOptions) setBaseServiceOption(f *pflag.FlagSet) {
-	f.StringVarP(&opts.baseService, "base-service", "b", DEFAULT_BASE_SERVICE, "base current service name")
+	f.StringVarP(
+		&opts.baseService,
+		"base-service",
+		"b",
+		defaultRootCommandOptions.baseService,
+		"base current service name",
+	)
+}
+
+func (opts *rootCommandOptions) createWithMerge(
+	co *composeOptions,
+	do *devcontainerOptions,
+) (*rootCommandOptions, error) {
+	newOpts := createNewRootCommandOptions()
+	newOpts.overwriteWithDevcontainerOptions(do)
+	newOpts.overwriteWithBaseServiceOption(opts)
+	newOpts.overwriteWithComposeOptions(co)
+	return newOpts, nil
+}
+
+func (opts *rootCommandOptions) overwriteWithDevcontainerOptions(do *devcontainerOptions) {
+	if !stringArrayEquals(do.dockerComposeFile, defaultDevcontainerOptions.dockerComposeFile) {
+		opts.ConfigPaths = do.dockerComposeFile
+	}
+	if do.service != defaultDevcontainerOptions.service {
+		opts.baseService = do.service
+	}
+	if do.localWorkspaceFolder != defaultDevcontainerOptions.localWorkspaceFolder {
+		opts.ProjectDir = do.localWorkspaceFolder
+	}
+}
+
+func (opts *rootCommandOptions) overwriteWithBaseServiceOption(ro *rootCommandOptions) {
+	if ro.baseService != defaultRootCommandOptions.baseService {
+		opts.baseService = ro.baseService
+	}
+}
+
+func (opts *rootCommandOptions) overwriteWithComposeOptions(co *composeOptions) {
+	if !stringArrayEquals(co.Profiles, defaultComposeOptions.Profiles) {
+		opts.Profiles = co.Profiles
+	}
+	if co.ProjectName != defaultComposeOptions.ProjectName {
+		opts.ProjectName = co.ProjectName
+	}
+	if !stringArrayEquals(co.ConfigPaths, defaultComposeOptions.ConfigPaths) {
+		opts.ConfigPaths = co.ConfigPaths
+	}
+	if !stringArrayEquals(co.EnvFiles, defaultComposeOptions.EnvFiles) {
+		opts.EnvFiles = co.EnvFiles
+	}
+	if co.ProjectDir != defaultComposeOptions.ProjectDir {
+		opts.ProjectDir = co.ProjectDir
+	}
 }
 
 func NewRootCommand() *cobra.Command {
-	opts := rootCommandOptions{
-		composeOpts: composeOptions{},
-		baseService: "",
-	}
+	do := createNewDevcontainerOptions()
+	co := createNewComposeOptions()
+	ro := createNewRootCommandOptions()
 	cmd := &cobra.Command{
 		Use:   "pathru",
 		Short: "Command pass-through helper with path conversion",
 		Long: `pathru is a CLI command for help executing command in external container.
 Usage: pathru <runtime service name> <execute command> -- [command arguments & options]`,
-		RunE: opts.runBody,
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 1 {
+				return fmt.Errorf(
+					"arguments must be given more than 1 [actual = \"%v\"]",
+					args,
+				)
+			}
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			parsedDevcontainerOptions, err := do.parse()
+			if err != nil {
+				return err
+			}
+			opts, err := ro.createWithMerge(co, parsedDevcontainerOptions)
+			if err != nil {
+				return err
+			}
+
+			runService, runArgs := args[0], args[1:]
+			prjOpts := compose.ProjectOptions(opts.composeOptions)
+			convertedArgs, err := pathru.Process(
+				&prjOpts,
+				opts.baseService,
+				runService,
+				runArgs,
+			)
+			if err != nil {
+				return err
+			}
+
+			fmt.Printf("%v\n", strings.Join(convertedArgs, " "))
+			return nil
+		},
 	}
-	opts.composeOpts.set(cmd.PersistentFlags())
-	opts.setBaseServiceOption(cmd.PersistentFlags())
+	f := cmd.PersistentFlags()
+	co.set(f)
+	do.set(f)
+	ro.setBaseServiceOption(f)
 	return cmd
-}
-
-func (opts *rootCommandOptions) runBody(cmd *cobra.Command, args []string) error {
-	runService, runArgs, err := opts.parseRunService(args)
-	if err != nil {
-		return err
-	}
-	prjOpts := compose.ProjectOptions(opts.composeOpts)
-
-	convertedArgs, err := pathru.Process(
-		&prjOpts,
-		opts.baseService,
-		runService,
-		runArgs,
-	)
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("%v\n", strings.Join(convertedArgs, " "))
-	return nil
-}
-
-func (opts *rootCommandOptions) parseRunService(args []string) (string, []string, error) {
-	if len(args) < 1 {
-		return "", nil, fmt.Errorf("not enough argument(s) are given")
-	}
-	return args[0], args[1:], nil
 }
