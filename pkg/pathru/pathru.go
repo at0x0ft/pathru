@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 )
 
+const HOST_BASE_SERVICE = ""
+
 func Process(
 	opts *compose.ProjectOptions,
 	baseService string,
@@ -27,7 +29,7 @@ func pathExists(path string) bool {
 }
 
 func resolveArgs(args []string, baseService, runtimeService string, mounts map[string][]mount.BindMount) ([]string, error) {
-	r := resolver.PathResolver{Mounts: mounts}
+	r := &resolver.PathResolver{Mounts: mounts}
 	res := make([]string, len(args))
 	for i, arg := range args {
 		if !pathExists(arg) {
@@ -39,11 +41,23 @@ func resolveArgs(args []string, baseService, runtimeService string, mounts map[s
 		if err != nil {
 			return nil, err
 		}
-		p, err := r.Resolve(absPath, baseService, runtimeService)
+		p, err := resolve(r, absPath, baseService, runtimeService)
 		if err != nil {
 			return nil, err
 		}
 		res[i] = p
 	}
 	return res, nil
+}
+
+func resolve(
+	r *resolver.PathResolver,
+	absPath,
+	baseService,
+	runtimeService string,
+) (string, error) {
+	if baseService == HOST_BASE_SERVICE {
+		return r.ResolveFromHost(absPath, runtimeService)
+	}
+	return r.Resolve(absPath, baseService, runtimeService)
 }
