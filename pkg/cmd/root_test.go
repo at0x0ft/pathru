@@ -54,7 +54,7 @@ func providerTestParseOptionsSuccess(t *testing.T) map[string]parseOptionsSucces
 			[]string{"-c", fixturePaths["single_normal"]},
 			&rootCommandOptions{
 				composeOptions: composeOptions{
-					ConfigPaths: []string{"./docker-compose.yml"},
+					ConfigPaths: []string{"test_data/docker-compose.yml"},
 				},
 				baseService: "base_shell2",
 			},
@@ -63,7 +63,7 @@ func providerTestParseOptionsSuccess(t *testing.T) map[string]parseOptionsSucces
 			[]string{"-c", fixturePaths["multiple_normal"]},
 			&rootCommandOptions{
 				composeOptions: composeOptions{
-					ConfigPaths: []string{"../src/docker-compose.yml", "./compose.yaml"},
+					ConfigPaths: []string{"src/docker-compose.yml", "test_data/compose.yaml"},
 				},
 				baseService: "shell",
 			},
@@ -81,7 +81,7 @@ func providerTestParseOptionsSuccess(t *testing.T) map[string]parseOptionsSucces
 			[]string{"-c", fixturePaths["multiple_normal"], "-b", "overwritten_base"},
 			&rootCommandOptions{
 				composeOptions: composeOptions{
-					ConfigPaths: []string{"../src/docker-compose.yml", "./compose.yaml"},
+					ConfigPaths: []string{"src/docker-compose.yml", "test_data/compose.yaml"},
 				},
 				baseService: "overwritten_base",
 			},
@@ -99,7 +99,7 @@ func providerTestParseOptionsSuccess(t *testing.T) map[string]parseOptionsSucces
 			[]string{"-c", fixturePaths["multiple_normal"], "--project-directory", "/workspace"},
 			&rootCommandOptions{
 				composeOptions: composeOptions{
-					ConfigPaths: []string{"../src/docker-compose.yml", "./compose.yaml"},
+					ConfigPaths: []string{"src/docker-compose.yml", "test_data/compose.yaml"},
 					ProjectDir: "/workspace",
 				},
 				baseService: "shell",
