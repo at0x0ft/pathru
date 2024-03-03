@@ -25,9 +25,9 @@ jobs:
     - name: lint
       uses: reviewdog/action-golangci-lint@v2
       with:
+        github_token: ${{ secrets.github_token }}
         golang_ci_lint_flags: "--enable-all --exclude-use-default=false"
         go_version: ${{ env.GHA_GO_VERSION_SEMVAR }}
-        cache: false  # disable cache for consistent CI running
 
     - name: format
       run: make ci_format
