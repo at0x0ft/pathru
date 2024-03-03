@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/at0x0ft/pathru/pkg/devcontainer"
 	"github.com/at0x0ft/pathru/pkg/pathru"
 	"github.com/docker/compose/v2/cmd/compose"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	"github.com/spf13/viper"
 	"path/filepath"
 	"strings"
 )
@@ -17,13 +17,13 @@ const (
 	DEFAULT_BASE_SERVICE                        = "base_shell"
 )
 
-type composeOptions compose.ProjectOptions
-
 type rootCommandOptions struct {
 	devcontainerOpts devcontainerOptions
 	composeOpts composeOptions
 	baseService string
 }
+
+type composeOptions compose.ProjectOptions
 
 type devcontainerOptions struct {
 	path string
@@ -40,18 +40,14 @@ func (opts *devcontainerOptions) parse() (*devcontainerOptions, error) {
 		return nil, nil
 	}
 
-	dirName := filepath.Dir(opts.path)
-	baseName, ext := splitExt(filepath.Base(opts.path))
-	viper.SetConfigName(baseName)
-	viper.SetConfigType(ext)
-	viper.AddConfigPath(dirName)
-	if err := viper.ReadInConfig(); err != nil {
+	config, err := devcontainer.Parse(opts.path)
+	if err != nil {
 		return nil, err
 	}
 
 	newOpts := *opts
-	newOpts.dockerComposeFile = viper.GetStringSlice("dockerComposeFile")
-	newOpts.service = viper.GetString("service")
+	newOpts.dockerComposeFile = config.DockerComposeFile
+	newOpts.service = config.Service
 	return &newOpts, nil
 }
 
