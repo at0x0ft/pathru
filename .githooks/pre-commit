@@ -1,5 +1,4 @@
 #!/usr/bin/env sh
 set -eu
 
-# make format
-pwd
+make -f "$(git rev-parse --show-toplevel)/Makefile" git_pre_commit_hook_format
