@@ -13,8 +13,8 @@ build:
 stat:
 	$(docker_compose_run) go version -m ./bin/*
 
-.PHONY: pkg_update
-pkg_update:
+.PHONY: pkg_resolve
+pkg_resolve:
 	$(docker_compose_run) go mod tidy
 
 .PHONY: clean
