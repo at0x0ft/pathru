@@ -52,6 +52,9 @@ func (opts *rootCommandOptions) overwriteWithDevcontainerOptions(do *devcontaine
 	if do.service != defaultDevcontainerOptions.service {
 		opts.baseService = do.service
 	}
+	if do.localWorkspaceFolder != defaultDevcontainerOptions.localWorkspaceFolder {
+		opts.ProjectDir = do.localWorkspaceFolder
+	}
 }
 
 func (opts *rootCommandOptions) overwriteWithBaseServiceOption(ro *rootCommandOptions) {

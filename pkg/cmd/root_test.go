@@ -13,6 +13,7 @@ func TestMain(t *testing.M) {
 
 type parseOptionsSuccessTestCase struct {
 	args     []string
+	envVars  map[string]string
 	expected *rootCommandOptions
 }
 
@@ -25,6 +26,7 @@ func providerTestParseOptionsSuccess(t *testing.T) map[string]parseOptionsSucces
 	return map[string]parseOptionsSuccessTestCase{
 		"[basic] no specified case": {
 			[]string{},
+			map[string]string{},
 			&rootCommandOptions{
 				composeOptions: composeOptions{
 					ConfigPaths: []string{"./docker-compose.yml"},
@@ -34,6 +36,7 @@ func providerTestParseOptionsSuccess(t *testing.T) map[string]parseOptionsSucces
 		},
 		"[basic; compose options] single config file specified case": {
 			[]string{"-f", "./compose.yml"},
+			map[string]string{},
 			&rootCommandOptions{
 				composeOptions: composeOptions{
 					ConfigPaths: []string{"./compose.yml"},
@@ -43,6 +46,7 @@ func providerTestParseOptionsSuccess(t *testing.T) map[string]parseOptionsSucces
 		},
 		"[basic; compose options] multiple config files specified case": {
 			[]string{"-f", "./docker-compose.yml", "-f", "./docker-compose.override.yml"},
+			map[string]string{},
 			&rootCommandOptions{
 				composeOptions: composeOptions{
 					ConfigPaths: []string{"./docker-compose.yml", "./docker-compose.override.yml"},
@@ -52,24 +56,33 @@ func providerTestParseOptionsSuccess(t *testing.T) map[string]parseOptionsSucces
 		},
 		"[basic; devcontainer options] single normal case": {
 			[]string{"-c", fixturePaths["single_normal"]},
+			map[string]string{
+				"LOCAL_WORKSPACE_FOLDER": "/workspace",
+			},
 			&rootCommandOptions{
 				composeOptions: composeOptions{
 					ConfigPaths: []string{"test_data/docker-compose.yml"},
+					ProjectDir:  "/workspace",
 				},
 				baseService: "base_shell2",
 			},
 		},
 		"[basic; devcontainer options] multiple normal case": {
 			[]string{"-c", fixturePaths["multiple_normal"]},
+			map[string]string{
+				"PROJECT_DIR": "/project/tmp",
+			},
 			&rootCommandOptions{
 				composeOptions: composeOptions{
 					ConfigPaths: []string{"src/docker-compose.yml", "test_data/compose.yaml"},
+					ProjectDir:  "/project/tmp",
 				},
 				baseService: "shell",
 			},
 		},
 		"[basic; base service option] base service specified case": {
 			[]string{"-b", "base"},
+			map[string]string{},
 			&rootCommandOptions{
 				composeOptions: composeOptions{
 					ConfigPaths: []string{"./docker-compose.yml"},
@@ -79,24 +92,35 @@ func providerTestParseOptionsSuccess(t *testing.T) map[string]parseOptionsSucces
 		},
 		"[complicated] devcontainer config file & base service option specified case": {
 			[]string{"-c", fixturePaths["multiple_normal"], "-b", "overwritten_base"},
+			map[string]string{
+				"PROJECT_DIR": "/project/tmp",
+			},
 			&rootCommandOptions{
 				composeOptions: composeOptions{
 					ConfigPaths: []string{"src/docker-compose.yml", "test_data/compose.yaml"},
+					ProjectDir:  "/project/tmp",
 				},
 				baseService: "overwritten_base",
 			},
 		},
 		"[complicated] devcontainer config file & compose config files option specified case": {
 			[]string{"-c", fixturePaths["multiple_normal"], "-f", "./compose.yml", "-f", "./compose.override.yml"},
+			map[string]string{
+				"PROJECT_DIR": "/project/tmp",
+			},
 			&rootCommandOptions{
 				composeOptions: composeOptions{
 					ConfigPaths: []string{"./compose.yml", "./compose.override.yml"},
+					ProjectDir:  "/project/tmp",
 				},
 				baseService: "shell",
 			},
 		},
 		"[complicated] devcontainer config file & compose project directory option specified case": {
 			[]string{"-c", fixturePaths["multiple_normal"], "--project-directory", "/workspace"},
+			map[string]string{
+				"PROJECT_DIR": "/project/tmp",
+			},
 			&rootCommandOptions{
 				composeOptions: composeOptions{
 					ConfigPaths: []string{"src/docker-compose.yml", "test_data/compose.yaml"},
@@ -114,7 +138,13 @@ func TestParseOptionsSuccess(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			// no parallelization because using os.Args (global variable)
 			oldArgs := os.Args
+			for envName, value := range c.envVars {
+				os.Setenv(envName, value)
+			}
 			t.Cleanup(func() {
+				for envName, _ := range c.envVars {
+					os.Unsetenv(envName)
+				}
 				os.Args = oldArgs
 			})
 

@@ -3,12 +3,14 @@ package cmd
 import (
 	"github.com/at0x0ft/pathru/pkg/devcontainer"
 	"github.com/spf13/pflag"
+	"os"
 )
 
 type devcontainerOptions struct {
-	path              string
-	dockerComposeFile []string
-	service           string
+	path                 string
+	dockerComposeFile    []string
+	service              string
+	localWorkspaceFolder string
 }
 
 var defaultDevcontainerOptions = devcontainerOptions{}
@@ -35,5 +37,9 @@ func (opts *devcontainerOptions) parse() (*devcontainerOptions, error) {
 	newOpts := *opts
 	newOpts.dockerComposeFile = config.DockerComposeFile
 	newOpts.service = config.Service
+	envVarName := config.FindLocalWorkspaceFolderEnvVar()
+	if envVarName != "" {
+		newOpts.localWorkspaceFolder = os.Getenv(envVarName)
+	}
 	return &newOpts, nil
 }
