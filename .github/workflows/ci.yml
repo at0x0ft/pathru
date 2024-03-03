@@ -8,6 +8,10 @@ on:
 
 jobs:
   ci:
+    permissions:
+      checks: write
+      contents: read
+      pull-requests: write
     runs-on: ubuntu-latest
     env:
       GHA_GO_VERSION_SEMVAR: '^1.22.0'
