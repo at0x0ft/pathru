@@ -8,11 +8,11 @@ import (
 type composeOptions compose.ProjectOptions
 
 var defaultComposeOptions = composeOptions{
-	Profiles: []string{},
+	Profiles:    []string{},
 	ProjectName: "",
 	ConfigPaths: []string{"./docker-compose.yml"},
-	EnvFiles: nil,
-	ProjectDir: "",
+	EnvFiles:    nil,
+	ProjectDir:  "",
 }
 
 func createNewComposeOptions() *composeOptions {

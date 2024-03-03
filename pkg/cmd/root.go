@@ -16,7 +16,7 @@ type rootCommandOptions struct {
 
 var defaultRootCommandOptions = rootCommandOptions{
 	composeOptions: defaultComposeOptions,
-	baseService: "base_shell",
+	baseService:    "base_shell",
 }
 
 func createNewRootCommandOptions() *rootCommandOptions {
@@ -42,7 +42,7 @@ func (opts *rootCommandOptions) createWithMerge(
 	newOpts.overwriteWithDevcontainerOptions(do)
 	newOpts.overwriteWithBaseServiceOption(opts)
 	newOpts.overwriteWithComposeOptions(co)
-	return newOpts, nil;
+	return newOpts, nil
 }
 
 func (opts *rootCommandOptions) overwriteWithDevcontainerOptions(do *devcontainerOptions) {
@@ -87,7 +87,7 @@ func NewRootCommand() *cobra.Command {
 		Short: "Command pass-through helper with path conversion",
 		Long: `pathru is a CLI command for help executing command in external container.
 Usage: pathru <runtime service name> <execute command> -- [command arguments & options]`,
-		Args: func (cmd *cobra.Command, args []string) error {
+		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
 				return fmt.Errorf(
 					"arguments must be given more than 1 [actual = \"%v\"]",
@@ -96,7 +96,7 @@ Usage: pathru <runtime service name> <execute command> -- [command arguments & o
 			}
 			return nil
 		},
-		RunE: func (cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			parsedDevcontainerOptions, err := do.parse()
 			if err != nil {
 				return err

@@ -18,7 +18,7 @@ type parseOptionsSuccessTestCase struct {
 
 func providerTestParseOptionsSuccess(t *testing.T) map[string]parseOptionsSuccessTestCase {
 	fixturePaths := map[string]string{
-		"single_normal": "./test_data/devcontainer.single.normal.json",
+		"single_normal":   "./test_data/devcontainer.single.normal.json",
 		"multiple_normal": "./test_data/devcontainer.multiple.normal.json",
 	}
 
@@ -100,7 +100,7 @@ func providerTestParseOptionsSuccess(t *testing.T) map[string]parseOptionsSucces
 			&rootCommandOptions{
 				composeOptions: composeOptions{
 					ConfigPaths: []string{"src/docker-compose.yml", "test_data/compose.yaml"},
-					ProjectDir: "/workspace",
+					ProjectDir:  "/workspace",
 				},
 				baseService: "shell",
 			},
@@ -118,7 +118,7 @@ func TestParseOptionsSuccess(t *testing.T) {
 				os.Args = oldArgs
 			})
 
-			tc := func (opts *rootCommandOptions) {
+			tc := func(opts *rootCommandOptions) {
 				assertComposeOptions(t, c.expected, opts)
 				assertBaseServiceOptions(t, c.expected, opts)
 			}
@@ -184,12 +184,12 @@ func assertBaseServiceOptions(
 	}
 }
 
-func NewRootCommandMock(tc func (opts *rootCommandOptions)) *cobra.Command {
+func NewRootCommandMock(tc func(opts *rootCommandOptions)) *cobra.Command {
 	do := createNewDevcontainerOptions()
 	co := createNewComposeOptions()
 	ro := createNewRootCommandOptions()
 	cmd := &cobra.Command{
-		RunE: func (cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			parsedDevcontainerOptions, err := do.parse()
 			if err != nil {
 				return err

@@ -6,9 +6,9 @@ import (
 )
 
 type devcontainerOptions struct {
-	path string
+	path              string
 	dockerComposeFile []string
-	service string
+	service           string
 }
 
 var defaultDevcontainerOptions = devcontainerOptions{}
