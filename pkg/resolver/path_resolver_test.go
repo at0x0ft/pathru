@@ -59,24 +59,12 @@ func providerTestResolveSuccess() map[string]ResolveSuccessTestCase {
 			"golang",
 			"/go/src/pkg/cmd/root.go",
 		},
-		// "multiple subpath matched case": {
-		// 	"/home/testuser",
-		// 	"/workspace/hoge",
-		// 	"/workspace/hoge/fuga",
-		// 	"/home/testuser/fuga",
-		// },
-		// "mountPoints are directories case": {
-		// 	"/home/testuser/",
-		// 	"/workspace/",
-		// 	"/workspace/hoge/fuga/piyo",
-		// 	"/home/testuser/hoge/fuga/piyo",
-		// },
-		// "directory path converts to slash trailed path": {
-		// 	"/home/testuser",
-		// 	"/workspace",
-		// 	"/workspace/hoge/",
-		// 	"/home/testuser/hoge",
-		// },
+		"services are same case": {
+			"/workspace/pkg/cmd/root.go",
+			"base_shell",
+			"base_shell",
+			"/workspace/pkg/cmd/root.go",
+		},
 	}
 }
 
@@ -103,46 +91,3 @@ func TestResolveSuccess(t *testing.T) {
 		})
 	}
 }
-
-// type ResolveTargetToSourceFailTestCase struct {
-// 	source string
-// 	target string
-// 	path string
-// 	expectedMsg string
-// }
-
-// func providerTestResolveTargetToSourceFail() map[string]ResolveTargetToSourceFailTestCase {
-// 	return map[string]ResolveTargetToSourceFailTestCase{
-// 		"path not containing mount.source": {
-// 			"/home/testuser",
-// 			"/workspace",
-// 			"/home/hoge/fuga",
-// 			"given path cannot reach to its mount base path [given: \"/home/hoge/fuga\", base: \"/workspace\"]",
-// 		},
-// 	}
-// }
-
-// func TestResolveTargetToSourceFail(t * testing.T) {
-// 	cases := providerTestResolveTargetToSourceFail()
-// 	for name, c := range cases {
-// 		t.Run(name, func(t *testing.T) {
-// 			t.Parallel()
-// 			bm := BindMount{c.source, c.target}
-// 			result, err := bm.ResolveTargetToSource(c.path)
-// 			if err == nil {
-// 				t.Errorf("no error thrown [result = \"%s\"]", result)
-// 				t.FailNow()
-// 			}
-
-// 			actual := err.Error()
-// 			if c.expectedMsg != actual {
-// 				t.Errorf(
-// 					"error message does not match [expected = \"%s\", actual = \"%s\"]",
-// 					c.expectedMsg,
-// 					actual,
-// 				)
-// 				t.FailNow()
-// 			}
-// 		})
-// 	}
-// }
