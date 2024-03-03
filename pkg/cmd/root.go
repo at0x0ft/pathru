@@ -66,9 +66,13 @@ func (opts *rootCommandOptions) createWithOverWrite(
 	co *composeOptions,
 	do *devcontainerOptions,
 ) (*rootCommandOptions, error) {
-	newOpts := &rootCommandOptions{baseService: DEFAULT_BASE_SERVICE}
-	newOpts.ConfigPaths = []string{COMPOSE_PROJECT_OPTIONS_DEFAULT_CONFIG_PATH}
-	newOpts.ProjectDir = COMPOSE_PROJECT_OPTIONS_DEFAULT_PROJECT_DIR
+	newOpts := &rootCommandOptions{
+		composeOptions: composeOptions{
+			ConfigPaths: []string{COMPOSE_PROJECT_OPTIONS_DEFAULT_CONFIG_PATH},
+			ProjectDir: COMPOSE_PROJECT_OPTIONS_DEFAULT_PROJECT_DIR,
+		},
+		baseService: DEFAULT_BASE_SERVICE,
+	}
 
 	if do != nil {
 		newOpts.ConfigPaths = do.dockerComposeFile

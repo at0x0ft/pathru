@@ -13,22 +13,34 @@ func TestMain(t *testing.M) {
 
 type SetComposeOptionsSuccessTestCase struct {
 	args     []string
-	expected []string
+	expected *rootCommandOptions
 }
 
 func providerTestSetComposeOptionsSuccess(t *testing.T) map[string]SetComposeOptionsSuccessTestCase {
 	return map[string]SetComposeOptionsSuccessTestCase{
 		"single file specified case": {
 			[]string{"-f", "./compose.yml"},
-			[]string{"./compose.yml"},
+			&rootCommandOptions{
+				composeOptions: composeOptions{
+					ConfigPaths: []string{"./compose.yml"},
+				},
+			},
 		},
 		"multiple files specified case": {
 			[]string{"-f", "./docker-compose.yml", "-f", "./docker-compose.override.yml"},
-			[]string{"./docker-compose.yml", "./docker-compose.override.yml"},
+			&rootCommandOptions{
+				composeOptions: composeOptions{
+					ConfigPaths: []string{"./docker-compose.yml", "./docker-compose.override.yml"},
+				},
+			},
 		},
 		"using default path when no file specified case": {
 			[]string{},
-			[]string{"./docker-compose.yml"},
+			&rootCommandOptions{
+				composeOptions: composeOptions{
+					ConfigPaths: []string{"./docker-compose.yml"},
+				},
+			},
 		},
 	}
 }
@@ -44,15 +56,15 @@ func TestSetComposeOptionsSuccess(t *testing.T) {
 			})
 
 			tc := func (opts *rootCommandOptions) {
-				if el, al := len(c.expected), len(opts.ConfigPaths); el != al {
+				if el, al := len(c.expected.ConfigPaths), len(opts.ConfigPaths); el != al {
 					t.Errorf(
 						"parsed config path counts do not match [expected = \"%s\", actual = \"%s\"]",
-						c.expected,
+						c.expected.ConfigPaths,
 						opts.ConfigPaths,
 					)
 					t.FailNow()
 				}
-				for i, ep := range c.expected {
+				for i, ep := range c.expected.ConfigPaths {
 					ap := opts.ConfigPaths[i]
 					if ep != ap {
 						t.Errorf(
