@@ -23,7 +23,7 @@ func providerTestParseSuccess(t *testing.T) map[string]ParseSuccessTestCase {
 		absPath, err := filepath.Abs(filepath.Dir(path))
 		if err != nil {
 			t.Errorf("%v", err.Error())
-			return nil
+			t.FailNow()
 		}
 		absContexts[n] = absPath
 	}
@@ -85,6 +85,7 @@ func TestParseSuccess(t *testing.T) {
 			actual, err := p.Parse(opts)
 			if err != nil {
 				t.Error(err)
+				t.FailNow()
 			}
 
 			if el, al := len(c.expected), len(actual); el != al {
@@ -93,6 +94,7 @@ func TestParseSuccess(t *testing.T) {
 					c.expected,
 					actual,
 				)
+				t.FailNow()
 			}
 			for s, ems := range c.expected {
 				ams, ok := actual[s]
@@ -101,6 +103,7 @@ func TestParseSuccess(t *testing.T) {
 						"actual does not have expected service [\"%s\"]",
 						s,
 					)
+					t.FailNow()
 				}
 
 				if !cmp.Equal(ems, ams) {
@@ -110,6 +113,7 @@ func TestParseSuccess(t *testing.T) {
 						ems,
 						ams,
 					)
+					t.FailNow()
 				}
 			}
 		})

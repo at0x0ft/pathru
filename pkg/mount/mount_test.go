@@ -1,14 +1,6 @@
 package mount
 
-import (
-	"os"
-	"testing"
-)
-
-func TestMain(t *testing.M) {
-	code := t.Run()
-	os.Exit(code)
-}
+import "testing"
 
 type ConvertTargetToSourceSuccessTestCase struct {
 	source   string
@@ -55,6 +47,7 @@ func TestConvertTargetToSourceSuccess(t *testing.T) {
 			actual, err := bm.ConvertTargetToSource(c.path)
 			if err != nil {
 				t.Error(err)
+				t.FailNow()
 			}
 
 			if c.expected != actual {
@@ -63,6 +56,7 @@ func TestConvertTargetToSourceSuccess(t *testing.T) {
 					c.expected,
 					actual,
 				)
+				t.FailNow()
 			}
 		})
 	}
@@ -95,7 +89,7 @@ func TestResolveTargetToSourceFail(t *testing.T) {
 			result, err := bm.ConvertTargetToSource(c.path)
 			if err == nil {
 				t.Errorf("no error thrown [result = \"%s\"]", result)
-				return
+				t.FailNow()
 			}
 
 			actual := err.Error()
@@ -105,6 +99,7 @@ func TestResolveTargetToSourceFail(t *testing.T) {
 					c.expectedMsg,
 					actual,
 				)
+				t.FailNow()
 			}
 		})
 	}
