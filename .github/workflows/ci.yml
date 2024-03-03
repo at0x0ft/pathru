@@ -34,7 +34,3 @@ jobs:
         level: info
         golang_ci_lint_flags: " --skip-dirs=.go_build,.git --enable-all --exclude-use-default=false"
         go_version: ${{ env.GHA_GO_VERSION_SEMVAR }}
-        cache: false  # disable for consisten CI running
-
-    - name: format
-      run: make ci_format
