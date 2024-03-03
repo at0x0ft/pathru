@@ -142,7 +142,7 @@ func TestParseOptionsSuccess(t *testing.T) {
 				os.Setenv(envName, value)
 			}
 			t.Cleanup(func() {
-				for envName := range c.envVars {
+				for envName, _ := range c.envVars {
 					os.Unsetenv(envName)
 				}
 				os.Args = oldArgs
