@@ -10,26 +10,67 @@ import (
 	"strings"
 )
 
-const (
-	COMPOSE_PROJECT_OPTIONS_DEFAULT_CONFIG_PATH = "./docker-compose.yml"
-	COMPOSE_PROJECT_OPTIONS_DEFAULT_PROJECT_DIR = ""
-	DEFAULT_BASE_SERVICE                        = "base_shell"
-)
+type composeOptions compose.ProjectOptions
 
-type rootCommandOptions struct {
-	composeOptions
-	baseService string
+var defaultComposeOptions = composeOptions{
+	Profiles: []string{},
+	ProjectName: "",
+	ConfigPaths: []string{"./docker-compose.yml"},
+	EnvFiles: nil,
+	ProjectDir: "",
 }
 
-type composeOptions compose.ProjectOptions
+func createNewComposeOptions() *composeOptions {
+	res := defaultComposeOptions
+	return &res
+}
+
+func (opts *composeOptions) equals(arg *composeOptions) bool {
+	if arg == nil {
+		return false
+	}
+	if opts.ProjectName != arg.ProjectName || opts.ProjectDir != arg.ProjectDir {
+		return false
+	}
+	return stringArrayEquals(opts.Profiles, arg.Profiles) &&
+		stringArrayEquals(opts.ConfigPaths, arg.ConfigPaths) &&
+		stringArrayEquals(opts.EnvFiles, arg.EnvFiles)
+}
 
 // ref: https://github.com/docker/compose/blob/d10a179f3e451f8b03fd99271f011c34bc31bedb/cmd/compose/compose.go#L157-L167
 func (opts *composeOptions) set(f *pflag.FlagSet) {
-	f.StringArrayVar(&opts.Profiles, "profile", []string{}, "Specify a profile to enable")
-	f.StringVarP(&opts.ProjectName, "project-name", "p", "", "Project name")
-	f.StringArrayVarP(&opts.ConfigPaths, "file", "f", []string{COMPOSE_PROJECT_OPTIONS_DEFAULT_CONFIG_PATH}, "Compose configuration files")
-	f.StringArrayVar(&opts.EnvFiles, "env-file", nil, "Specify an alternate environment file")
-	f.StringVar(&opts.ProjectDir, "project-directory", COMPOSE_PROJECT_OPTIONS_DEFAULT_PROJECT_DIR, "Specify an alternate working directory\n(default: the path of the, first specified, Compose file)")
+	f.StringArrayVar(
+		&opts.Profiles,
+		"profile",
+		defaultComposeOptions.Profiles,
+		"Specify a profile to enable",
+	)
+	f.StringVarP(
+		&opts.ProjectName,
+		"project-name",
+		"p",
+		defaultComposeOptions.ProjectName,
+		"Project name",
+	)
+	f.StringArrayVarP(
+		&opts.ConfigPaths,
+		"file",
+		"f",
+		defaultComposeOptions.ConfigPaths,
+		"Compose configuration files",
+	)
+	f.StringArrayVar(
+		&opts.EnvFiles,
+		"env-file",
+		defaultComposeOptions.EnvFiles,
+		"Specify an alternate environment file",
+	)
+	f.StringVar(
+		&opts.ProjectDir,
+		"project-directory",
+		defaultComposeOptions.ProjectDir,
+		"Specify an alternate working directory\n(default: the path of the, first specified, Compose file)",
+	)
 }
 
 type devcontainerOptions struct {
@@ -38,13 +79,30 @@ type devcontainerOptions struct {
 	service string
 }
 
+var defaultDevcontainerOptions = devcontainerOptions{}
+
+func createNewDevcontainerOptions() *devcontainerOptions {
+	res := defaultDevcontainerOptions
+	return &res
+}
+
+func (opts *devcontainerOptions) equals(arg *devcontainerOptions) bool {
+	if arg == nil {
+		return false
+	}
+	if opts.path != arg.path || opts.service != arg.service {
+		return false
+	}
+	return stringArrayEquals(opts.dockerComposeFile, arg.dockerComposeFile)
+}
+
 func (opts *devcontainerOptions) set(f *pflag.FlagSet) {
 	f.StringVarP(&opts.path, "config-path", "c", "", "path to devcontainer.json")
 }
 
 func (opts *devcontainerOptions) parse() (*devcontainerOptions, error) {
 	if opts.path == "" {
-		return nil, nil
+		return createNewDevcontainerOptions(), nil
 	}
 
 	config, err := devcontainer.Parse(opts.path)
@@ -58,28 +116,51 @@ func (opts *devcontainerOptions) parse() (*devcontainerOptions, error) {
 	return &newOpts, nil
 }
 
+type rootCommandOptions struct {
+	composeOptions
+	baseService string
+}
+
+var defaultRootCommandOptions = rootCommandOptions{
+	composeOptions: defaultComposeOptions,
+	baseService: "base_shell",
+}
+
+func createNewRootCommandOptions() *rootCommandOptions {
+	res := defaultRootCommandOptions
+	return &res
+}
+
+func (opts *rootCommandOptions) equals(arg *rootCommandOptions) bool {
+	if opts.baseService != arg.baseService {
+		return false
+	}
+	return opts.composeOptions.equals(&arg.composeOptions)
+}
+
 func (opts *rootCommandOptions) setBaseServiceOption(f *pflag.FlagSet) {
-	f.StringVarP(&opts.baseService, "base-service", "b", DEFAULT_BASE_SERVICE, "base current service name")
+	f.StringVarP(
+		&opts.baseService,
+		"base-service",
+		"b",
+		defaultRootCommandOptions.baseService,
+		"base current service name",
+	)
 }
 
 func (opts *rootCommandOptions) createWithOverWrite(
 	co *composeOptions,
 	do *devcontainerOptions,
 ) (*rootCommandOptions, error) {
-	newOpts := &rootCommandOptions{
-		composeOptions: composeOptions{
-			ConfigPaths: []string{COMPOSE_PROJECT_OPTIONS_DEFAULT_CONFIG_PATH},
-			ProjectDir: COMPOSE_PROJECT_OPTIONS_DEFAULT_PROJECT_DIR,
-		},
-		baseService: DEFAULT_BASE_SERVICE,
-	}
-
-	if do != nil {
+	newOpts := createNewRootCommandOptions()
+	if !do.equals(&defaultDevcontainerOptions) {
 		newOpts.ConfigPaths = do.dockerComposeFile
 		newOpts.baseService = do.service
 	}
-	newOpts.baseService = opts.baseService
-	if co != nil {
+	if !opts.equals(&defaultRootCommandOptions) {
+		newOpts.baseService = opts.baseService
+	}
+	if co != nil && !co.equals(&defaultComposeOptions) {
 		newOpts.composeOptions = *co
 	}
 
@@ -87,7 +168,9 @@ func (opts *rootCommandOptions) createWithOverWrite(
 }
 
 func NewRootCommand() *cobra.Command {
-	ro, co, do := &rootCommandOptions{}, &composeOptions{}, &devcontainerOptions{}
+	do := createNewDevcontainerOptions()
+	co := createNewComposeOptions()
+	ro := createNewRootCommandOptions()
 	cmd := &cobra.Command{
 		Use:   "pathru",
 		Short: "Command pass-through helper with path conversion",
@@ -129,8 +212,25 @@ Usage: pathru <runtime service name> <execute command> -- [command arguments & o
 		},
 	}
 	f := cmd.PersistentFlags()
-	ro.setBaseServiceOption(f)
 	co.set(f)
 	do.set(f)
+	ro.setBaseServiceOption(f)
 	return cmd
+}
+
+func stringArrayEquals(ls1 []string, ls2 []string) bool {
+	if ls1 == nil && ls2 == nil {
+		return true
+	} else if ls1 == nil || ls2 == nil {
+		return false
+	}
+	if len(ls1) != len(ls2) {
+		return false
+	}
+	for i, e1 := range ls1 {
+		if e1 != ls2[i] {
+			return false
+		}
+	}
+	return true
 }
