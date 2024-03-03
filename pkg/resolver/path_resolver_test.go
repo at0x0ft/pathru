@@ -89,6 +89,7 @@ func TestResolveSuccess(t *testing.T) {
 			actual, err := pr.Resolve(c.path, c.baseService, c.dstService)
 			if err != nil {
 				t.Errorf("%v", err)
+				t.FailNow()
 			}
 
 			if c.expected != actual {
@@ -97,6 +98,7 @@ func TestResolveSuccess(t *testing.T) {
 					c.expected,
 					actual,
 				)
+				t.FailNow()
 			}
 		})
 	}
@@ -129,7 +131,7 @@ func TestResolveSuccess(t *testing.T) {
 // 			result, err := bm.ResolveTargetToSource(c.path)
 // 			if err == nil {
 // 				t.Errorf("no error thrown [result = \"%s\"]", result)
-// 				return
+// 				t.FailNow()
 // 			}
 
 // 			actual := err.Error()
@@ -139,6 +141,7 @@ func TestResolveSuccess(t *testing.T) {
 // 					c.expectedMsg,
 // 					actual,
 // 				)
+// 				t.FailNow()
 // 			}
 // 		})
 // 	}
