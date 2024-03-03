@@ -5,6 +5,10 @@ common_build_options := CGO_ENABLED=0
 common_test_command := go test -v ./...
 common_format_command := go fmt ./...
 
+.PHONY: setup
+setup:
+	ln -svf ../../.githooks/pre-commit .git/hooks/pre-commit
+
 .PHONY: build
 build:
 	$(docker_compose_run) -e '$(common_build_options)' $(common_build_command)
