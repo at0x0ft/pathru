@@ -3,7 +3,7 @@
   "dockerComposeFile": [
       "./docker-compose.yml"
   ],
-  "service": "base_shell",
+  "service": "base_shell2",
   "workspaceFolder": "/workspace",
   "remoteEnv": {
       "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}",

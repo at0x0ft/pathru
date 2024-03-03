@@ -56,7 +56,7 @@ func providerTestParseOptionsSuccess(t *testing.T) map[string]parseOptionsSucces
 				composeOptions: composeOptions{
 					ConfigPaths: []string{"./docker-compose.yml"},
 				},
-				baseService: "base_shell",
+				baseService: "base_shell2",
 			},
 		},
 		"[basic; devcontainer options] multiple normal case": {
@@ -75,6 +75,24 @@ func providerTestParseOptionsSuccess(t *testing.T) map[string]parseOptionsSucces
 					ConfigPaths: []string{"./docker-compose.yml"},
 				},
 				baseService: "base",
+			},
+		},
+		"[complicated] devcontainer config file & base service option specified case": {
+			[]string{"-c", fixturePaths["multiple_normal"], "-b", "overwritten_base"},
+			&rootCommandOptions{
+				composeOptions: composeOptions{
+					ConfigPaths: []string{"../src/docker-compose.yml", "./compose.yaml"},
+				},
+				baseService: "overwritten_base",
+			},
+		},
+		"[complicated] devcontainer config file & compose config files option specified case": {
+			[]string{"-c", fixturePaths["multiple_normal"], "-f", "./compose.yml", "-f", "./compose.override.yml"},
+			&rootCommandOptions{
+				composeOptions: composeOptions{
+					ConfigPaths: []string{"./compose.yml", "./compose.override.yml"},
+				},
+				baseService: "shell",
 			},
 		},
 	}
