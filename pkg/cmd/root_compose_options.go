@@ -20,18 +20,6 @@ func createNewComposeOptions() *composeOptions {
 	return &res
 }
 
-func (opts *composeOptions) equals(arg *composeOptions) bool {
-	if arg == nil {
-		return false
-	}
-	if opts.ProjectName != arg.ProjectName || opts.ProjectDir != arg.ProjectDir {
-		return false
-	}
-	return stringArrayEquals(opts.Profiles, arg.Profiles) &&
-		stringArrayEquals(opts.ConfigPaths, arg.ConfigPaths) &&
-		stringArrayEquals(opts.EnvFiles, arg.EnvFiles)
-}
-
 // ref: https://github.com/docker/compose/blob/d10a179f3e451f8b03fd99271f011c34bc31bedb/cmd/compose/compose.go#L157-L167
 func (opts *composeOptions) set(f *pflag.FlagSet) {
 	f.StringArrayVar(

@@ -95,6 +95,16 @@ func providerTestParseOptionsSuccess(t *testing.T) map[string]parseOptionsSucces
 				baseService: "shell",
 			},
 		},
+		"[complicated] devcontainer config file & compose project directory option specified case": {
+			[]string{"-c", fixturePaths["multiple_normal"], "--project-directory", "/workspace"},
+			&rootCommandOptions{
+				composeOptions: composeOptions{
+					ConfigPaths: []string{"../src/docker-compose.yml", "./compose.yaml"},
+					ProjectDir: "/workspace",
+				},
+				baseService: "shell",
+			},
+		},
 	}
 }
 
@@ -132,7 +142,7 @@ func assertComposeOptions(
 ) {
 	if el, al := len(expected.ConfigPaths), len(actual.ConfigPaths); el != al {
 		t.Errorf(
-			"parsed config path counts do not match [expected = \"%s\", actual = \"%s\"]",
+			"parsed config path counts do not match [expected = \"%v\", actual = \"%v\"]",
 			expected.ConfigPaths,
 			actual.ConfigPaths,
 		)
@@ -142,12 +152,20 @@ func assertComposeOptions(
 		ap := actual.ConfigPaths[i]
 		if ep != ap {
 			t.Errorf(
-				"parsed path does not match [expected = \"%s\", actual = \"%s\"]",
-				ep,
-				ap,
+				"parsed config path does not match [expected = \"%v\", actual = \"%v\"]",
+				expected.ConfigPaths,
+				actual.ConfigPaths,
 			)
 			t.FailNow()
 		}
+	}
+	if expected.ProjectDir != actual.ProjectDir {
+		t.Errorf(
+			"parsed project directory does not match [expected = \"%v\", actual = \"%v\"]",
+			expected.ProjectDir,
+			actual.ProjectDir,
+		)
+		t.FailNow()
 	}
 }
 
@@ -176,7 +194,7 @@ func NewRootCommandMock(tc func (opts *rootCommandOptions)) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			opts, err := ro.createWithOverWrite(co, parsedDevcontainerOptions)
+			opts, err := ro.createWithMerge(co, parsedDevcontainerOptions)
 			if err != nil {
 				return err
 			}

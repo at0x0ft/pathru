@@ -18,16 +18,6 @@ func createNewDevcontainerOptions() *devcontainerOptions {
 	return &res
 }
 
-func (opts *devcontainerOptions) equals(arg *devcontainerOptions) bool {
-	if arg == nil {
-		return false
-	}
-	if opts.path != arg.path || opts.service != arg.service {
-		return false
-	}
-	return stringArrayEquals(opts.dockerComposeFile, arg.dockerComposeFile)
-}
-
 func (opts *devcontainerOptions) set(f *pflag.FlagSet) {
 	f.StringVarP(&opts.path, "config-path", "c", "", "path to devcontainer.json")
 }
