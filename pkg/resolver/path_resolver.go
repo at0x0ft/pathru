@@ -21,12 +21,15 @@ func (pr *PathResolver) Resolve(path, baseService, runService string) (string, e
 	if err != nil {
 		return "", err
 	}
+	return pr.ResolveFromHost(basePath, runService)
+}
 
-	dstMount, err := pr.findMountFromSource(basePath, runService)
+func (pr *PathResolver) ResolveFromHost(path, runService string) (string, error) {
+	dstMount, err := pr.findMountFromSource(path, runService)
 	if err != nil {
 		return "", err
 	}
-	return dstMount.ConvertSourceToTarget(basePath)
+	return dstMount.ConvertSourceToTarget(path)
 }
 
 func (pr *PathResolver) findMountFromSource(path, service string) (*mount.BindMount, error) {

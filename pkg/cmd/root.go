@@ -16,7 +16,7 @@ type rootCommandOptions struct {
 
 var defaultRootCommandOptions = rootCommandOptions{
 	composeOptions: defaultComposeOptions,
-	baseService:    "base_shell",
+	baseService:    pathru.HOST_BASE_SERVICE,
 }
 
 func createNewRootCommandOptions() *rootCommandOptions {

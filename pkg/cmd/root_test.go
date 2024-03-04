@@ -31,7 +31,6 @@ func providerTestParseOptionsSuccess(t *testing.T) map[string]parseOptionsSucces
 				composeOptions: composeOptions{
 					ConfigPaths: []string{"./docker-compose.yml"},
 				},
-				baseService: "base_shell",
 			},
 		},
 		"[basic; compose options] single config file specified case": {
@@ -41,7 +40,6 @@ func providerTestParseOptionsSuccess(t *testing.T) map[string]parseOptionsSucces
 				composeOptions: composeOptions{
 					ConfigPaths: []string{"./compose.yml"},
 				},
-				baseService: "base_shell",
 			},
 		},
 		"[basic; compose options] multiple config files specified case": {
@@ -51,7 +49,6 @@ func providerTestParseOptionsSuccess(t *testing.T) map[string]parseOptionsSucces
 				composeOptions: composeOptions{
 					ConfigPaths: []string{"./docker-compose.yml", "./docker-compose.override.yml"},
 				},
-				baseService: "base_shell",
 			},
 		},
 		"[basic; devcontainer options] single normal case": {
@@ -64,7 +61,7 @@ func providerTestParseOptionsSuccess(t *testing.T) map[string]parseOptionsSucces
 					ConfigPaths: []string{"test_data/docker-compose.yml"},
 					ProjectDir:  "/workspace",
 				},
-				baseService: "base_shell2",
+				baseService: "base_shell",
 			},
 		},
 		"[basic; devcontainer options] multiple normal case": {
