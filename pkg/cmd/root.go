@@ -10,81 +10,21 @@ import (
 )
 
 type rootCommandOptions struct {
-	composeOptions
-	baseService string
+	baseService *OptionData[string]
 }
 
-var defaultRootCommandOptions = rootCommandOptions{
-	composeOptions: defaultComposeOptions,
-	baseService:    pathru.HOST_BASE_SERVICE,
-}
-
-func createNewRootCommandOptions() *rootCommandOptions {
-	res := defaultRootCommandOptions
-	return &res
-}
-
-func (opts *rootCommandOptions) setBaseServiceOption(f *pflag.FlagSet) {
-	f.StringVarP(
-		&opts.baseService,
+func (opts *rootCommandOptions) set(f *pflag.FlagSet) {
+	opts.baseService = CreateStringPersistentOptionData(
+		f,
+		pathru.HOST_BASE_SERVICE,
 		"base-service",
 		"b",
-		defaultRootCommandOptions.baseService,
 		"base current service name",
 	)
 }
 
-func (opts *rootCommandOptions) createWithMerge(
-	co *composeOptions,
-	do *devcontainerOptions,
-) (*rootCommandOptions, error) {
-	newOpts := createNewRootCommandOptions()
-	newOpts.overwriteWithDevcontainerOptions(do)
-	newOpts.overwriteWithBaseServiceOption(opts)
-	newOpts.overwriteWithComposeOptions(co)
-	return newOpts, nil
-}
-
-func (opts *rootCommandOptions) overwriteWithDevcontainerOptions(do *devcontainerOptions) {
-	if !stringArrayEquals(do.dockerComposeFile, defaultDevcontainerOptions.dockerComposeFile) {
-		opts.ConfigPaths = do.dockerComposeFile
-	}
-	if do.service != defaultDevcontainerOptions.service {
-		opts.baseService = do.service
-	}
-	if do.localWorkspaceFolder != defaultDevcontainerOptions.localWorkspaceFolder {
-		opts.ProjectDir = do.localWorkspaceFolder
-	}
-}
-
-func (opts *rootCommandOptions) overwriteWithBaseServiceOption(ro *rootCommandOptions) {
-	if ro.baseService != defaultRootCommandOptions.baseService {
-		opts.baseService = ro.baseService
-	}
-}
-
-func (opts *rootCommandOptions) overwriteWithComposeOptions(co *composeOptions) {
-	if !stringArrayEquals(co.Profiles, defaultComposeOptions.Profiles) {
-		opts.Profiles = co.Profiles
-	}
-	if co.ProjectName != defaultComposeOptions.ProjectName {
-		opts.ProjectName = co.ProjectName
-	}
-	if !stringArrayEquals(co.ConfigPaths, defaultComposeOptions.ConfigPaths) {
-		opts.ConfigPaths = co.ConfigPaths
-	}
-	if !stringArrayEquals(co.EnvFiles, defaultComposeOptions.EnvFiles) {
-		opts.EnvFiles = co.EnvFiles
-	}
-	if co.ProjectDir != defaultComposeOptions.ProjectDir {
-		opts.ProjectDir = co.ProjectDir
-	}
-}
-
 func NewRootCommand() *cobra.Command {
-	do := createNewDevcontainerOptions()
-	co := createNewComposeOptions()
-	ro := createNewRootCommandOptions()
+	ro, co, do := &rootCommandOptions{}, &composeOptions{}, &devcontainerOptions{}
 	cmd := &cobra.Command{
 		Use:   "pathru",
 		Short: "Command pass-through helper with path conversion",
@@ -100,20 +40,16 @@ Usage: pathru <runtime service name> <execute command> -- [command arguments & o
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			parsedDevcontainerOptions, err := do.parse()
-			if err != nil {
-				return err
-			}
-			opts, err := ro.createWithMerge(co, parsedDevcontainerOptions)
+			configData, err := do.parse()
 			if err != nil {
 				return err
 			}
 
+			prjOpts, baseService := mergeOptions(ro, co, configData)
 			runService, runArgs := args[0], args[1:]
-			prjOpts := compose.ProjectOptions(opts.composeOptions)
 			convertedArgs, err := pathru.Process(
-				&prjOpts,
-				opts.baseService,
+				prjOpts,
+				baseService,
 				runService,
 				runArgs,
 			)
@@ -126,8 +62,44 @@ Usage: pathru <runtime service name> <execute command> -- [command arguments & o
 		},
 	}
 	f := cmd.PersistentFlags()
+	ro.set(f)
 	co.set(f)
 	do.set(f)
-	ro.setBaseServiceOption(f)
 	return cmd
+}
+
+func mergeOptions(
+	r *rootCommandOptions,
+	c *composeOptions,
+	d *devcontainerData,
+) (*compose.ProjectOptions, string) {
+	return getProjectOptions(r, c, d), getBaseService(r, d)
+}
+
+func getProjectOptions(
+	r *rootCommandOptions,
+	c *composeOptions,
+	d *devcontainerData,
+) *compose.ProjectOptions {
+	res := &compose.ProjectOptions{
+		Profiles:    c.profiles.Value(),
+		ProjectName: c.projectName.Value(),
+		ConfigPaths: c.configPaths.Value(),
+		EnvFiles:    c.envFiles.Value(),
+		ProjectDir:  c.projectDir.Value(),
+	}
+	if !c.configPaths.IsSet() && d != nil {
+		res.ConfigPaths = d.dockerComposeFile
+	}
+	if !c.projectDir.IsSet() && d != nil {
+		res.ProjectDir = d.localWorkspaceFolder
+	}
+	return res
+}
+
+func getBaseService(r *rootCommandOptions, d *devcontainerData) string {
+	if !r.baseService.IsSet() && d != nil {
+		return d.service
+	}
+	return r.baseService.Value()
 }
