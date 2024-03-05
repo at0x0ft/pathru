@@ -10,9 +10,9 @@ type OptionData[T int | string | []string] struct {
 
 func CreateIntPersistentOptionData(
 	fs *pflag.FlagSet,
-	name,
-	shorthand string,
 	defaultValue int,
+	name,
+	shorthand,
 	usage string,
 ) *OptionData[int] {
 	o := &OptionData[int]{name: name, fs: fs}
@@ -22,8 +22,8 @@ func CreateIntPersistentOptionData(
 
 func CreateIntOptionData(
 	fs *pflag.FlagSet,
-	name string,
 	defaultValue int,
+	name,
 	usage string,
 ) *OptionData[int] {
 	o := &OptionData[int]{name: name, fs: fs}
@@ -33,9 +33,9 @@ func CreateIntOptionData(
 
 func CreateStringPersistentOptionData(
 	fs *pflag.FlagSet,
-	name,
-	shorthand string,
 	defaultValue string,
+	name,
+	shorthand,
 	usage string,
 ) *OptionData[string] {
 	o := &OptionData[string]{name: name, fs: fs}
@@ -45,8 +45,8 @@ func CreateStringPersistentOptionData(
 
 func CreateStringOptionData(
 	fs *pflag.FlagSet,
-	name,
 	defaultValue string,
+	name,
 	usage string,
 ) *OptionData[string] {
 	o := &OptionData[string]{name: name, fs: fs}
@@ -56,9 +56,9 @@ func CreateStringOptionData(
 
 func CreateStringArrayPersistentOptionData(
 	fs *pflag.FlagSet,
-	name,
-	shorthand string,
 	defaultValue []string,
+	name,
+	shorthand,
 	usage string,
 ) *OptionData[[]string] {
 	o := &OptionData[[]string]{name: name, fs: fs}
@@ -68,8 +68,8 @@ func CreateStringArrayPersistentOptionData(
 
 func CreateStringArrayOptionData(
 	fs *pflag.FlagSet,
-	name string,
 	defaultValue []string,
+	name,
 	usage string,
 ) *OptionData[[]string] {
 	o := &OptionData[[]string]{name: name, fs: fs}

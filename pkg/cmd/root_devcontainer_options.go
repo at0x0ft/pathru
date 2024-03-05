@@ -7,39 +7,42 @@ import (
 )
 
 type devcontainerOptions struct {
-	path                 string
+	path *OptionData[string]
+}
+
+type devcontainerData struct {
 	dockerComposeFile    []string
 	service              string
 	localWorkspaceFolder string
 }
 
-var defaultDevcontainerOptions = devcontainerOptions{}
-
-func createNewDevcontainerOptions() *devcontainerOptions {
-	res := defaultDevcontainerOptions
-	return &res
-}
-
 func (opts *devcontainerOptions) set(f *pflag.FlagSet) {
-	f.StringVarP(&opts.path, "config-path", "c", "", "path to devcontainer.json")
+	opts.path = CreateStringPersistentOptionData(
+		f,
+		"",
+		"config-path",
+		"c",
+		"path to devcontainer.json",
+	)
 }
 
-func (opts *devcontainerOptions) parse() (*devcontainerOptions, error) {
-	if opts.path == "" {
-		return createNewDevcontainerOptions(), nil
+func (opts *devcontainerOptions) parse() (*devcontainerData, error) {
+	if !opts.path.IsSet() {
+		return nil, nil
 	}
 
-	config, err := devcontainer.Parse(opts.path)
+	config, err := devcontainer.Parse(opts.path.Value())
 	if err != nil {
 		return nil, err
 	}
 
-	newOpts := *opts
-	newOpts.dockerComposeFile = config.DockerComposeFile
-	newOpts.service = config.Service
-	envVarName := config.FindLocalWorkspaceFolderEnvVar()
-	if envVarName != "" {
-		newOpts.localWorkspaceFolder = os.Getenv(envVarName)
+	localWorkspaceFolder := ""
+	if envVarName := config.FindLocalWorkspaceFolderEnvVar(); envVarName != "" {
+		localWorkspaceFolder = os.Getenv(envVarName)
 	}
-	return &newOpts, nil
+	return &devcontainerData{
+		dockerComposeFile:    config.DockerComposeFile,
+		service:              config.Service,
+		localWorkspaceFolder: localWorkspaceFolder,
+	}, nil
 }

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/docker/compose/v2/cmd/compose"
 	"github.com/spf13/cobra"
 	"os"
 	"testing"
@@ -14,7 +15,12 @@ func TestMain(t *testing.M) {
 type parseOptionsSuccessTestCase struct {
 	args     []string
 	envVars  map[string]string
-	expected *rootCommandOptions
+	expected *parseOptionsSuccessExpectedValues
+}
+
+type parseOptionsSuccessExpectedValues struct {
+	prjOpts     *compose.ProjectOptions
+	baseService string
 }
 
 func providerTestParseOptionsSuccess(t *testing.T) map[string]parseOptionsSuccessTestCase {
@@ -27,8 +33,8 @@ func providerTestParseOptionsSuccess(t *testing.T) map[string]parseOptionsSucces
 		"[basic] no specified case": {
 			[]string{},
 			map[string]string{},
-			&rootCommandOptions{
-				composeOptions: composeOptions{
+			&parseOptionsSuccessExpectedValues{
+				prjOpts: &compose.ProjectOptions{
 					ConfigPaths: []string{"./docker-compose.yml"},
 				},
 			},
@@ -36,8 +42,8 @@ func providerTestParseOptionsSuccess(t *testing.T) map[string]parseOptionsSucces
 		"[basic; compose options] single config file specified case": {
 			[]string{"-f", "./compose.yml"},
 			map[string]string{},
-			&rootCommandOptions{
-				composeOptions: composeOptions{
+			&parseOptionsSuccessExpectedValues{
+				prjOpts: &compose.ProjectOptions{
 					ConfigPaths: []string{"./compose.yml"},
 				},
 			},
@@ -45,8 +51,8 @@ func providerTestParseOptionsSuccess(t *testing.T) map[string]parseOptionsSucces
 		"[basic; compose options] multiple config files specified case": {
 			[]string{"-f", "./docker-compose.yml", "-f", "./docker-compose.override.yml"},
 			map[string]string{},
-			&rootCommandOptions{
-				composeOptions: composeOptions{
+			&parseOptionsSuccessExpectedValues{
+				prjOpts: &compose.ProjectOptions{
 					ConfigPaths: []string{"./docker-compose.yml", "./docker-compose.override.yml"},
 				},
 			},
@@ -56,8 +62,8 @@ func providerTestParseOptionsSuccess(t *testing.T) map[string]parseOptionsSucces
 			map[string]string{
 				"LOCAL_WORKSPACE_FOLDER": "/workspace",
 			},
-			&rootCommandOptions{
-				composeOptions: composeOptions{
+			&parseOptionsSuccessExpectedValues{
+				prjOpts: &compose.ProjectOptions{
 					ConfigPaths: []string{"test_data/docker-compose.yml"},
 					ProjectDir:  "/workspace",
 				},
@@ -69,8 +75,8 @@ func providerTestParseOptionsSuccess(t *testing.T) map[string]parseOptionsSucces
 			map[string]string{
 				"PROJECT_DIR": "/project/tmp",
 			},
-			&rootCommandOptions{
-				composeOptions: composeOptions{
+			&parseOptionsSuccessExpectedValues{
+				prjOpts: &compose.ProjectOptions{
 					ConfigPaths: []string{"src/docker-compose.yml", "test_data/compose.yaml"},
 					ProjectDir:  "/project/tmp",
 				},
@@ -80,8 +86,8 @@ func providerTestParseOptionsSuccess(t *testing.T) map[string]parseOptionsSucces
 		"[basic; base service option] base service specified case": {
 			[]string{"-b", "base"},
 			map[string]string{},
-			&rootCommandOptions{
-				composeOptions: composeOptions{
+			&parseOptionsSuccessExpectedValues{
+				prjOpts: &compose.ProjectOptions{
 					ConfigPaths: []string{"./docker-compose.yml"},
 				},
 				baseService: "base",
@@ -92,8 +98,8 @@ func providerTestParseOptionsSuccess(t *testing.T) map[string]parseOptionsSucces
 			map[string]string{
 				"PROJECT_DIR": "/project/tmp",
 			},
-			&rootCommandOptions{
-				composeOptions: composeOptions{
+			&parseOptionsSuccessExpectedValues{
+				prjOpts: &compose.ProjectOptions{
 					ConfigPaths: []string{"src/docker-compose.yml", "test_data/compose.yaml"},
 					ProjectDir:  "/project/tmp",
 				},
@@ -105,8 +111,8 @@ func providerTestParseOptionsSuccess(t *testing.T) map[string]parseOptionsSucces
 			map[string]string{
 				"PROJECT_DIR": "/project/tmp",
 			},
-			&rootCommandOptions{
-				composeOptions: composeOptions{
+			&parseOptionsSuccessExpectedValues{
+				prjOpts: &compose.ProjectOptions{
 					ConfigPaths: []string{"./compose.yml", "./compose.override.yml"},
 					ProjectDir:  "/project/tmp",
 				},
@@ -118,12 +124,25 @@ func providerTestParseOptionsSuccess(t *testing.T) map[string]parseOptionsSucces
 			map[string]string{
 				"PROJECT_DIR": "/project/tmp",
 			},
-			&rootCommandOptions{
-				composeOptions: composeOptions{
+			&parseOptionsSuccessExpectedValues{
+				prjOpts: &compose.ProjectOptions{
 					ConfigPaths: []string{"src/docker-compose.yml", "test_data/compose.yaml"},
 					ProjectDir:  "/workspace",
 				},
 				baseService: "shell",
+			},
+		},
+		"[complicated] devcontainer config file & localhost base service option specified case": {
+			[]string{"-c", fixturePaths["multiple_normal"], "-b", ""},
+			map[string]string{
+				"PROJECT_DIR": "/project/tmp",
+			},
+			&parseOptionsSuccessExpectedValues{
+				prjOpts: &compose.ProjectOptions{
+					ConfigPaths: []string{"src/docker-compose.yml", "test_data/compose.yaml"},
+					ProjectDir:  "/project/tmp",
+				},
+				baseService: "",
 			},
 		},
 	}
@@ -145,9 +164,9 @@ func TestParseOptionsSuccess(t *testing.T) {
 				os.Args = oldArgs
 			})
 
-			tc := func(opts *rootCommandOptions) {
-				assertComposeOptions(t, c.expected, opts)
-				assertBaseServiceOptions(t, c.expected, opts)
+			tc := func(prjOpts *compose.ProjectOptions, baseService string) {
+				assertComposeOptions(t, c.expected.prjOpts, prjOpts)
+				assertBaseServiceOptions(t, c.expected.baseService, baseService)
 			}
 
 			os.Args = append([]string{"command"}, c.args...)
@@ -162,11 +181,7 @@ func TestParseOptionsSuccess(t *testing.T) {
 	}
 }
 
-func assertComposeOptions(
-	t *testing.T,
-	expected *rootCommandOptions,
-	actual *rootCommandOptions,
-) {
+func assertComposeOptions(t *testing.T, expected, actual *compose.ProjectOptions) {
 	if el, al := len(expected.ConfigPaths), len(actual.ConfigPaths); el != al {
 		t.Errorf(
 			"parsed config path counts do not match [expected = \"%v\", actual = \"%v\"]",
@@ -196,42 +211,35 @@ func assertComposeOptions(
 	}
 }
 
-func assertBaseServiceOptions(
-	t *testing.T,
-	expected *rootCommandOptions,
-	actual *rootCommandOptions,
-) {
-	if expected.baseService != actual.baseService {
+func assertBaseServiceOptions(t *testing.T, expected, actual string) {
+	if expected != actual {
 		t.Errorf(
 			"parsed base service do not match [expected = \"%s\", actual = \"%s\"]",
-			expected.baseService,
-			actual.baseService,
+			expected,
+			actual,
 		)
 		t.FailNow()
 	}
 }
 
-func NewRootCommandMock(tc func(opts *rootCommandOptions)) *cobra.Command {
-	do := createNewDevcontainerOptions()
-	co := createNewComposeOptions()
-	ro := createNewRootCommandOptions()
+func NewRootCommandMock(
+	tc func(prjOpts *compose.ProjectOptions, baseService string),
+) *cobra.Command {
+	ro, co, do := &rootCommandOptions{}, &composeOptions{}, &devcontainerOptions{}
 	cmd := &cobra.Command{
 		RunE: func(cmd *cobra.Command, args []string) error {
-			parsedDevcontainerOptions, err := do.parse()
+			configData, err := do.parse()
 			if err != nil {
 				return err
 			}
-			opts, err := ro.createWithMerge(co, parsedDevcontainerOptions)
-			if err != nil {
-				return err
-			}
-			tc(opts)
+			prjOpts, baseService := mergeOptions(ro, co, configData)
+			tc(prjOpts, baseService)
 			return nil
 		},
 	}
 	f := cmd.PersistentFlags()
+	ro.set(f)
 	co.set(f)
 	do.set(f)
-	ro.setBaseServiceOption(f)
 	return cmd
 }
