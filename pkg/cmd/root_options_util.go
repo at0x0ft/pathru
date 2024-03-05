@@ -1,5 +1,94 @@
 package cmd
 
+import "github.com/spf13/pflag"
+
+type OptionData[T int | string | []string] struct {
+	value T
+	name  string
+	fs    *pflag.FlagSet
+}
+
+func CreateIntPersistentOptionData(
+	fs *pflag.FlagSet,
+	name,
+	shorthand string,
+	defaultValue int,
+	usage string,
+) *OptionData[int] {
+	o := &OptionData[int]{name: name, fs: fs}
+	o.fs.IntVarP(&o.value, o.name, shorthand, defaultValue, usage)
+	return o
+}
+
+func CreateIntOptionData(
+	fs *pflag.FlagSet,
+	name string,
+	defaultValue int,
+	usage string,
+) *OptionData[int] {
+	o := &OptionData[int]{name: name, fs: fs}
+	o.fs.IntVar(&o.value, o.name, defaultValue, usage)
+	return o
+}
+
+func CreateStringPersistentOptionData(
+	fs *pflag.FlagSet,
+	name,
+	shorthand string,
+	defaultValue string,
+	usage string,
+) *OptionData[string] {
+	o := &OptionData[string]{name: name, fs: fs}
+	o.fs.StringVarP(&o.value, o.name, shorthand, defaultValue, usage)
+	return o
+}
+
+func CreateStringOptionData(
+	fs *pflag.FlagSet,
+	name,
+	defaultValue string,
+	usage string,
+) *OptionData[string] {
+	o := &OptionData[string]{name: name, fs: fs}
+	o.fs.StringVar(&o.value, o.name, defaultValue, usage)
+	return o
+}
+
+func CreateStringArrayPersistentOptionData(
+	fs *pflag.FlagSet,
+	name,
+	shorthand string,
+	defaultValue []string,
+	usage string,
+) *OptionData[[]string] {
+	o := &OptionData[[]string]{name: name, fs: fs}
+	o.fs.StringArrayVarP(&o.value, o.name, shorthand, defaultValue, usage)
+	return o
+}
+
+func CreateStringArrayOptionData(
+	fs *pflag.FlagSet,
+	name string,
+	defaultValue []string,
+	usage string,
+) *OptionData[[]string] {
+	o := &OptionData[[]string]{name: name, fs: fs}
+	o.fs.StringArrayVar(&o.value, o.name, defaultValue, usage)
+	return o
+}
+
+func (o *OptionData[T]) Value() T {
+	return o.value
+}
+
+func (o *OptionData[T]) IsSet() bool {
+	f := o.fs.Lookup(o.name)
+	if f == nil {
+		return false
+	}
+	return f.Changed
+}
+
 func stringArrayEquals(ls1 []string, ls2 []string) bool {
 	if ls1 == nil && ls2 == nil {
 		return true
