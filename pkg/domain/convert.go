@@ -21,7 +21,11 @@ func Convert(
 	if err != nil {
 		return nil, err
 	}
-	return resolveArgs(args, baseService, runService, mounts)
+	resolvedArgs, err := resolveArgs(args, baseService, runService, mounts)
+	if err != nil {
+		return nil, err
+	}
+	return append([]string{runService}, resolvedArgs...), nil
 }
 
 func pathExists(path string) bool {
