@@ -1,4 +1,4 @@
-package pathru
+package domain
 
 import (
 	"github.com/at0x0ft/pathru/pkg/mount"
@@ -10,17 +10,22 @@ import (
 
 const HOST_BASE_SERVICE = ""
 
-func Process(
+func Convert(
 	opts *compose.ProjectOptions,
 	baseService string,
-	runService string,
 	args []string,
 ) ([]string, error) {
+	runService := args[0]
+	args = args[1:]
 	mounts, err := (&mount.MountParser{}).Parse(opts)
 	if err != nil {
 		return nil, err
 	}
-	return resolveArgs(args, baseService, runService, mounts)
+	resolvedArgs, err := resolveArgs(args, baseService, runService, mounts)
+	if err != nil {
+		return nil, err
+	}
+	return append([]string{runService}, resolvedArgs...), nil
 }
 
 func pathExists(path string) bool {
