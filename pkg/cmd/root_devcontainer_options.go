@@ -6,8 +6,18 @@ import (
 	"os"
 )
 
-type devcontainerOptions struct {
-	path *OptionData[string]
+type RootDevcontainerOptionsState uint8
+
+const (
+	DATA_IS_NOT_PARSED RootDevcontainerOptionsState = iota
+	DATA_IS_SET
+	DATA_IS_NOT_SET
+)
+
+type rootDevcontainerOptions struct {
+	state RootDevcontainerOptionsState
+	path  *OptionData[string]
+	data  *devcontainerData
 }
 
 type devcontainerData struct {
@@ -16,7 +26,7 @@ type devcontainerData struct {
 	localWorkspaceFolder string
 }
 
-func (opts *devcontainerOptions) set(f *pflag.FlagSet) {
+func (opts *rootDevcontainerOptions) set(f *pflag.FlagSet) {
 	opts.path = CreateStringPersistentOptionData(
 		f,
 		"",
@@ -26,23 +36,26 @@ func (opts *devcontainerOptions) set(f *pflag.FlagSet) {
 	)
 }
 
-func (opts *devcontainerOptions) parse() (*devcontainerData, error) {
+func (opts *rootDevcontainerOptions) parse() error {
 	if !opts.path.IsSet() {
-		return nil, nil
+		opts.state = DATA_IS_NOT_SET
+		return nil
 	}
 
 	config, err := devcontainer.Parse(opts.path.Value())
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	localWorkspaceFolder := ""
 	if envVarName := config.FindLocalWorkspaceFolderEnvVar(); envVarName != "" {
 		localWorkspaceFolder = os.Getenv(envVarName)
 	}
-	return &devcontainerData{
+	opts.data = &devcontainerData{
 		dockerComposeFile:    config.DockerComposeFile,
 		service:              config.Service,
 		localWorkspaceFolder: localWorkspaceFolder,
-	}, nil
+	}
+	opts.state = DATA_IS_SET
+	return nil
 }

@@ -2,7 +2,7 @@ package cmd
 
 import "github.com/spf13/pflag"
 
-type composeOptions struct {
+type rootComposeOptions struct {
 	profiles    *OptionData[[]string]
 	projectName *OptionData[string]
 	configPaths *OptionData[[]string]
@@ -11,7 +11,7 @@ type composeOptions struct {
 }
 
 // ref: https://github.com/docker/compose/blob/d10a179f3e451f8b03fd99271f011c34bc31bedb/cmd/compose/compose.go#L157-L167
-func (opts *composeOptions) set(f *pflag.FlagSet) {
+func (opts *rootComposeOptions) set(f *pflag.FlagSet) {
 	opts.profiles = CreateStringArrayOptionData(
 		f,
 		[]string{},

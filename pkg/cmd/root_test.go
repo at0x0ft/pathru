@@ -7,11 +7,6 @@ import (
 	"testing"
 )
 
-func TestMain(t *testing.M) {
-	code := t.Run()
-	os.Exit(code)
-}
-
 type parseOptionsSuccessTestCase struct {
 	args     []string
 	envVars  map[string]string
@@ -225,21 +220,17 @@ func assertBaseServiceOptions(t *testing.T, expected, actual string) {
 func NewRootCommandMock(
 	tc func(prjOpts *compose.ProjectOptions, baseService string),
 ) *cobra.Command {
-	ro, co, do := &rootCommandOptions{}, &composeOptions{}, &devcontainerOptions{}
+	opts := createRootOptions()
 	cmd := &cobra.Command{
 		RunE: func(cmd *cobra.Command, args []string) error {
-			configData, err := do.parse()
-			if err != nil {
+			if err := opts.parse(); err != nil {
 				return err
 			}
-			prjOpts, baseService := mergeOptions(ro, co, configData)
+			prjOpts, baseService := opts.getProjectOptions(), opts.getBaseService()
 			tc(prjOpts, baseService)
 			return nil
 		},
 	}
-	f := cmd.PersistentFlags()
-	ro.set(f)
-	co.set(f)
-	do.set(f)
+	opts.set(cmd.PersistentFlags())
 	return cmd
 }

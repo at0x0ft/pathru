@@ -13,9 +13,10 @@ const HOST_BASE_SERVICE = ""
 func Convert(
 	opts *compose.ProjectOptions,
 	baseService string,
-	runService string,
 	args []string,
 ) ([]string, error) {
+	runService := args[0]
+	args = args[1:]
 	mounts, err := (&mount.MountParser{}).Parse(opts)
 	if err != nil {
 		return nil, err
