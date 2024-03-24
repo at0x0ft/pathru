@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/at0x0ft/pathru/pkg/pathru"
+	"github.com/at0x0ft/pathru/pkg/domain"
 	"github.com/docker/compose/v2/cmd/compose"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -16,7 +16,7 @@ type rootCommandOptions struct {
 func (opts *rootCommandOptions) set(f *pflag.FlagSet) {
 	opts.baseService = CreateStringPersistentOptionData(
 		f,
-		pathru.HOST_BASE_SERVICE,
+		domain.HOST_BASE_SERVICE,
 		"base-service",
 		"b",
 		"base current service name",
@@ -47,7 +47,7 @@ Usage: pathru <runtime service name> <execute command> -- [command arguments & o
 
 			prjOpts, baseService := mergeOptions(ro, co, configData)
 			runService, runArgs := args[0], args[1:]
-			convertedArgs, err := pathru.Process(
+			convertedArgs, err := domain.Convert(
 				prjOpts,
 				baseService,
 				runService,

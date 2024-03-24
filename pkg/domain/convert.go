@@ -1,4 +1,4 @@
-package pathru
+package domain
 
 import (
 	"github.com/at0x0ft/pathru/pkg/mount"
@@ -10,7 +10,7 @@ import (
 
 const HOST_BASE_SERVICE = ""
 
-func Process(
+func Convert(
 	opts *compose.ProjectOptions,
 	baseService string,
 	runService string,
