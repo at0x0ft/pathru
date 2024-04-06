@@ -2,15 +2,15 @@ package resolver
 
 import (
 	"fmt"
-	"github.com/at0x0ft/pathru/pkg/mount"
+	"github.com/at0x0ft/pathru/pkg/entity"
 	"strings"
 )
 
 type PathResolver struct {
-	Mounts map[string][]mount.BindMount
+	Mounts map[string][]entity.BindMount
 }
 
-type pathGetter func(mount.BindMount) string
+type pathGetter func(entity.BindMount) string
 
 func (pr *PathResolver) Resolve(path, baseService, runService string) (string, error) {
 	baseMount, err := pr.findMountFromTarget(path, baseService)
@@ -32,15 +32,15 @@ func (pr *PathResolver) ResolveFromHost(path, runService string) (string, error)
 	return dstMount.ConvertSourceToTarget(path)
 }
 
-func (pr *PathResolver) findMountFromSource(path, service string) (*mount.BindMount, error) {
-	getter := func(m mount.BindMount) string {
+func (pr *PathResolver) findMountFromSource(path, service string) (*entity.BindMount, error) {
+	getter := func(m entity.BindMount) string {
 		return m.Source
 	}
 	return pr.findMountBase(path, service, getter)
 }
 
-func (pr *PathResolver) findMountFromTarget(path, service string) (*mount.BindMount, error) {
-	getter := func(m mount.BindMount) string {
+func (pr *PathResolver) findMountFromTarget(path, service string) (*entity.BindMount, error) {
+	getter := func(m entity.BindMount) string {
 		return m.Target
 	}
 	return pr.findMountBase(path, service, getter)
@@ -50,7 +50,7 @@ func (pr *PathResolver) isAncestor(ancestorPath, childPath string) bool {
 	return strings.HasPrefix(childPath, ancestorPath)
 }
 
-func (pr *PathResolver) findMountBase(path, service string, getter pathGetter) (*mount.BindMount, error) {
+func (pr *PathResolver) findMountBase(path, service string, getter pathGetter) (*entity.BindMount, error) {
 	mounts, ok := pr.Mounts[service]
 	if !ok {
 		return nil, fmt.Errorf(

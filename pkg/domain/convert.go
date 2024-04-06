@@ -1,7 +1,8 @@
 package domain
 
 import (
-	"github.com/at0x0ft/pathru/pkg/mount"
+	"github.com/at0x0ft/pathru/pkg/entity"
+	"github.com/at0x0ft/pathru/pkg/parser"
 	"github.com/at0x0ft/pathru/pkg/resolver"
 	"github.com/docker/compose/v2/cmd/compose"
 	"os"
@@ -17,7 +18,7 @@ func Convert(
 ) ([]string, error) {
 	runService := args[0]
 	args = args[1:]
-	mounts, err := (&mount.MountParser{}).Parse(opts)
+	mounts, err := (&parser.MountParser{}).Parse(opts)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +34,7 @@ func pathExists(path string) bool {
 	return err == nil
 }
 
-func resolveArgs(args []string, baseService, runtimeService string, mounts map[string][]mount.BindMount) ([]string, error) {
+func resolveArgs(args []string, baseService, runtimeService string, mounts map[string][]entity.BindMount) ([]string, error) {
 	r := &resolver.PathResolver{Mounts: mounts}
 	res := make([]string, len(args))
 	for i, arg := range args {
