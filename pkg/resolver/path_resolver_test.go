@@ -1,7 +1,7 @@
 package resolver
 
 import (
-	"github.com/at0x0ft/pathru/pkg/mount"
+	"github.com/at0x0ft/pathru/pkg/entity"
 	"os"
 	"testing"
 )
@@ -11,32 +11,32 @@ func TestMain(t *testing.M) {
 	os.Exit(code)
 }
 
-func getMounts() map[string][]mount.BindMount {
-	return map[string][]mount.BindMount{
-		"base_shell": []mount.BindMount{
-			mount.BindMount{
+func getMounts() map[string][]entity.BindMount {
+	return map[string][]entity.BindMount{
+		"base_shell": []entity.BindMount{
+			entity.BindMount{
 				Source: "/etc/passwd",
 				Target: "/etc/passwd",
 			},
-			mount.BindMount{
+			entity.BindMount{
 				Source: "/etc/group",
 				Target: "/etc/group",
 			},
-			mount.BindMount{
+			entity.BindMount{
 				Source: "/home/testuser/Programming/test_project",
 				Target: "/workspace",
 			},
 		},
-		"golang": []mount.BindMount{
-			mount.BindMount{
+		"golang": []entity.BindMount{
+			entity.BindMount{
 				Source: "/etc/passwd",
 				Target: "/etc/passwd",
 			},
-			mount.BindMount{
+			entity.BindMount{
 				Source: "/etc/group",
 				Target: "/etc/group",
 			},
-			mount.BindMount{
+			entity.BindMount{
 				Source: "/home/testuser/Programming/test_project/golang",
 				Target: "/go/src",
 			},

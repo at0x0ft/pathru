@@ -1,15 +1,22 @@
-package mount
+package parser
 
 import (
+	"github.com/at0x0ft/pathru/pkg/entity"
 	"github.com/docker/compose/v2/cmd/compose"
 	"github.com/google/go-cmp/cmp"
+	"os"
 	"path/filepath"
 	"testing"
 )
 
+func TestMain(t *testing.M) {
+	code := t.Run()
+	os.Exit(code)
+}
+
 type ParseSuccessTestCase struct {
 	configPaths []string
-	expected    map[string][]BindMount
+	expected    map[string][]entity.BindMount
 }
 
 func providerTestParseSuccess(t *testing.T) map[string]ParseSuccessTestCase {
@@ -31,9 +38,9 @@ func providerTestParseSuccess(t *testing.T) map[string]ParseSuccessTestCase {
 	return map[string]ParseSuccessTestCase{
 		"short syntax normal case": {
 			[]string{fixturePaths["short_normal"]},
-			map[string][]BindMount{
-				"base_shell": []BindMount{
-					BindMount{
+			map[string][]entity.BindMount{
+				"base_shell": []entity.BindMount{
+					entity.BindMount{
 						Source: filepath.Join(absContexts["short_normal"], "./src"),
 						Target: "/workspace",
 					},
@@ -42,15 +49,15 @@ func providerTestParseSuccess(t *testing.T) map[string]ParseSuccessTestCase {
 		},
 		"long syntax normal case": {
 			[]string{fixturePaths["long_normal"]},
-			map[string][]BindMount{
-				"base_shell": []BindMount{
-					BindMount{
+			map[string][]entity.BindMount{
+				"base_shell": []entity.BindMount{
+					entity.BindMount{
 						Source: filepath.Join(absContexts["long_normal"], "."),
 						Target: "/workspace",
 					},
 				},
-				"golang": []BindMount{
-					BindMount{
+				"golang": []entity.BindMount{
+					entity.BindMount{
 						Source: "/home/testuser/Programming/test_project/golang",
 						Target: "/go/src",
 					},
@@ -59,13 +66,13 @@ func providerTestParseSuccess(t *testing.T) map[string]ParseSuccessTestCase {
 		},
 		"short syntax not found bind case": {
 			[]string{fixturePaths["no_bind"]},
-			map[string][]BindMount{},
+			map[string][]entity.BindMount{},
 		},
 		"override case": {
 			[]string{fixturePaths["long_normal"], fixturePaths["short_normal"], fixturePaths["no_bind"]},
-			map[string][]BindMount{
-				"golang": []BindMount{
-					BindMount{
+			map[string][]entity.BindMount{
+				"golang": []entity.BindMount{
+					entity.BindMount{
 						Source: "/home/testuser/Programming/test_project/golang",
 						Target: "/go/src",
 					},

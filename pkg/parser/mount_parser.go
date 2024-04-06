@@ -1,6 +1,7 @@
-package mount
+package parser
 
 import (
+	"github.com/at0x0ft/pathru/pkg/entity"
 	"github.com/compose-spec/compose-go/v2/cli"
 	"github.com/compose-spec/compose-go/v2/types"
 	"github.com/docker/compose/v2/cmd/compose"
@@ -8,7 +9,7 @@ import (
 
 type MountParser struct{}
 
-func (mp *MountParser) Parse(opts *compose.ProjectOptions) (map[string][]BindMount, error) {
+func (mp *MountParser) Parse(opts *compose.ProjectOptions) (map[string][]entity.BindMount, error) {
 	convertedOpts, err := mp.convertComposeProjectOptions(opts)
 	if err != nil {
 		return nil, err
@@ -19,7 +20,7 @@ func (mp *MountParser) Parse(opts *compose.ProjectOptions) (map[string][]BindMou
 		return nil, err
 	}
 
-	res := make(map[string][]BindMount)
+	res := make(map[string][]entity.BindMount)
 	for _, n := range prj.ServiceNames() {
 		s, err := prj.GetService(n)
 		if err != nil {
@@ -29,7 +30,7 @@ func (mp *MountParser) Parse(opts *compose.ProjectOptions) (map[string][]BindMou
 			if v.Type != types.VolumeTypeBind {
 				continue
 			}
-			res[n] = append(res[n], BindMount{Source: v.Source, Target: v.Target})
+			res[n] = append(res[n], entity.BindMount{Source: v.Source, Target: v.Target})
 		}
 	}
 	return res, nil

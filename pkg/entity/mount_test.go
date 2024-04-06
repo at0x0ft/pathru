@@ -1,12 +1,20 @@
-package mount
+package entity
 
-import "testing"
+import (
+	"os"
+	"testing"
+)
 
 type ConvertTargetToSourceSuccessTestCase struct {
 	source   string
 	target   string
 	path     string
 	expected string
+}
+
+func TestMain(t *testing.M) {
+	code := t.Run()
+	os.Exit(code)
 }
 
 func providerTestConvertTargetToSourceSuccess() map[string]ConvertTargetToSourceSuccessTestCase {
