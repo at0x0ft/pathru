@@ -68,12 +68,22 @@ ci_test:
 
 # === command(s) for git pre-commit hooks ===
 
+.PHONY: git_hook_pre_commit_check
+git_hook_pre_commit_check:
+	cd $(repository_root) && \
+	make git_hook_pre_commit_lint && \
+	make git_hook_pre_commit_format
+
+.PHONY: git_hook_pre_commit_lint
+git_hook_pre_commit_lint:
+	cd $(repository_root) && \
+	$(docker_compose_run) -T $(common_lint_command)
+
 .PHONY: git_hook_pre_commit_format
 git_hook_pre_commit_format:
+	# extract only golang source files (strip forward 3 positional arguments)
+	# e.g. gofmt -l -w main.go ... -> main.go ...
 	cd $(repository_root) && \
-	$(docker_compose_run) -T $(common_lint_command) && \
-	# extract only golang source files (strip forward 3 positional arguments) \
-	# e.g. gofmt -l -w main.go ... -> main.go ... \
 	set -- $$($(docker_compose_run) -T go fmt -n ./...) && shift 3 && \
 	result=$$($(docker_compose_run) -T --entrypoint=gofmt go -l $${@}) && \
 	if [ ! -z "$${result}" ]; then printf "not formatted files are found:\n%s\n" "$${result}"; exit 1; fi

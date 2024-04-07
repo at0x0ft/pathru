@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
 set -eu
 
-make -f "$(git rev-parse --show-toplevel)/Makefile" git_hook_pre_commit_format
+make -f "$(git rev-parse --show-toplevel)/Makefile" git_hook_pre_commit_check
