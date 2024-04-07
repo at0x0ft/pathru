@@ -9,7 +9,7 @@ func NewRootCommand() *cobra.Command {
 		Short: "Command pass-through helper with path conversion",
 		Long: `pathru is a CLI command for help executing command in external container.
 Usage: pathru [options] <subcommand> <runtime service name> <execute command> -- [command arguments & options]`,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			return opts.parse()
 		},
 	}
