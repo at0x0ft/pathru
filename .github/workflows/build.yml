@@ -12,6 +12,8 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     env:
       GHA_GO_VERSION_SEMVAR: '^1.22.0'
     steps:
