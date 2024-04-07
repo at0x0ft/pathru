@@ -15,6 +15,7 @@ Usage: pathru [options] <subcommand> <runtime service name> <execute command> --
 	}
 	opts.set(cmd.PersistentFlags())
 	cmd.AddCommand(
+		NewPrefixCommand(opts),
 		NewConvertCommand(opts),
 	)
 	return cmd
