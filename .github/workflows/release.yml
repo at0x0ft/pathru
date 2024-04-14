@@ -1,13 +1,9 @@
-name: build CLI tool written in Go & release to the GitHub Release
+name: Release to GitHub Release with tag
 
 on:
-  workflow_dispatch:
-    inputs:
-      method:
-        description: |
-          Specify semantic versioning which you want to release.
-          (version would be incremented depending on the specified semantic versioning.)
-        required: true
+  push:
+    tags:
+      - "v*"
 
 jobs:
   release:
@@ -35,13 +31,6 @@ jobs:
         printf '           states: "%s"' ${{ steps.ci_result.outputs.failedCheckStates }}
         exit 1
 
-    - uses: actions/checkout@v3
-    - name: Bump-up semantic version
-      id: vertag
-      uses: kyoh86/git-vertag-action@v1.1
-      with:
-        method: "${{ github.event.inputs.method }}"
-
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
@@ -49,6 +38,6 @@ jobs:
     - name: Run GoReleaser
       uses: goreleaser/goreleaser-action@v5
       with:
-        args: release --clean
+        args: release --clean --rm-dist
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
