@@ -54,12 +54,19 @@ format:
 	cd $(repository_root) && \
 	$(docker_compose_run) go fmt ./...
 
-# === command(s) for CI ===
+# === command(s) for debug shells ===
 
-.PHONY: ci_build
-ci_build:
+.PHONY: go_shell
+go_shell:
 	cd $(repository_root) && \
-	$(common_build_options) $(common_build_command)
+	$(docker_compose_run) --entrypoint=bash go
+
+.PHONY: releaser_shell
+releaser_shell:
+	cd $(repository_root) && \
+	$(docker_compose_run) --entrypoint=bash goreleaser
+
+# === command(s) for CI ===
 
 .PHONY: ci_test
 ci_test:

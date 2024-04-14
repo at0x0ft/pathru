@@ -8,6 +8,7 @@ on:
 
 jobs:
   ci:
+    name: test & lint
     permissions:
       checks: write
       contents: read
@@ -16,21 +17,42 @@ jobs:
     env:
       GHA_GO_VERSION_SEMVAR: '^1.22.0'
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: ${{ env.GHA_GO_VERSION_SEMVAR }}
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GHA_GO_VERSION_SEMVAR }}
 
-    - name: Test
-      run: make ci_test
+      - name: Test
+        run: make ci_test
 
-    - name: lint
-      uses: reviewdog/action-golangci-lint@v2
-      with:
-        github_token: ${{ secrets.github_token }}
-        reporter: github-pr-review
-        level: info
-        golang_ci_lint_flags: " --skip-dirs=.go_build,.git --enable-all --exclude-use-default=false"
-        go_version: ${{ env.GHA_GO_VERSION_SEMVAR }}
+      - name: lint
+        uses: reviewdog/action-golangci-lint@v2
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          level: info
+          golang_ci_lint_flags: " --skip-dirs=.go_build,.git --enable-all --exclude-use-default=false"
+          go_version: ${{ env.GHA_GO_VERSION_SEMVAR }}
+
+      - name: Pre-check for release (GoReleaser dry-run)
+        uses: goreleaser/goreleaser-action@v5
+        with:
+          args: release --clean --skip=publish --snapshot
+
+  ci_status:
+    name: CI status
+    runs-on: ubuntu-latest
+    needs: ci
+    permissions:
+      statuses: write
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set Check Status Success
+        uses: Sibz/github-status-action@v1.1.6
+        with:
+          context: ci_status
+          authToken: ${{ secrets.GITHUB_TOKEN }}
+          state: success

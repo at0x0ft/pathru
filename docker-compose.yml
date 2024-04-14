@@ -1,7 +1,6 @@
 version: "3.7"
 
 x-general_config: &general_config
-  image: golang:1.22
   working_dir: /go/src
   volumes:
     - .:/go/src
@@ -12,8 +11,16 @@ x-general_config: &general_config
   environment:
     - HOME=/tmp
 
-
 services:
   go:
     <<: *general_config
+    build:
+      dockerfile: Dockerfile
+      target: base
     entrypoint: go
+  goreleaser:
+    <<: *general_config
+    build:
+      dockerfile: Dockerfile
+      target: releaser
+    entrypoint: goreleaser
