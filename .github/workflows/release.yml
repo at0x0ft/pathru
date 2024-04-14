@@ -18,7 +18,7 @@ jobs:
       GHA_GO_VERSION_SEMVAR: '^1.22.0'
     steps:
     - name: Check Actor & Branch
-      if: github.actor != 'at0x0ft' || github.ref != github.ref != 'refs/heads/main'
+      if: github.actor != 'at0x0ft' || github.ref != 'refs/heads/main'
       run: exit 1
 
     - name: Wait for CI status
