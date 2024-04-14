@@ -31,6 +31,7 @@ jobs:
         printf '           states: "%s"' ${{ steps.ci_result.outputs.failedCheckStates }}
         exit 1
 
+    - uses: actions/checkout@v3
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
